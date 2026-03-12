@@ -1,0 +1,48 @@
+<%
+  const ps = typeof portfolioSummary !== 'undefined' ? portfolioSummary : {};
+  const totalValue = ps.totalCurrentValue || 0;
+  const totalInvested = ps.totalInvested || 0;
+  const totalGain = ps.totalGain || 0;
+  const totalGainPct = ps.totalGainPercent || 0;
+  const isGain = totalGain >= 0;
+  const gainColor = isGain ? 'var(--green)' : 'var(--red)';
+  const gainBg = isGain ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+%>
+<div class="portfolio-summary glass-strong" style="border-radius: var(--border-radius-lg); padding: var(--space-8); border: 1px solid var(--border-default);">
+  <div class="row g-4">
+    <!-- Total Value -->
+    <div class="col-6 col-md-3">
+      <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Thamani ya Sasa</p>
+      <span class="tabular-nums fw-700" style="font-size: var(--text-2xl); color: var(--text-primary);">
+        <%= totalValue.toLocaleString('en-TZ', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+      </span>
+      <span class="text-muted" style="font-size: var(--text-xs);"> TZS</span>
+    </div>
+
+    <!-- Total Invested -->
+    <div class="col-6 col-md-3">
+      <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Uwekezaji</p>
+      <span class="tabular-nums fw-600" style="font-size: var(--text-xl); color: var(--text-primary);">
+        <%= totalInvested.toLocaleString('en-TZ', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+      </span>
+      <span class="text-muted" style="font-size: var(--text-xs);"> TZS</span>
+    </div>
+
+    <!-- Gain / Loss -->
+    <div class="col-6 col-md-3">
+      <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Faida / Hasara</p>
+      <span class="tabular-nums fw-700" style="font-size: var(--text-xl); color: <%= gainColor %>;">
+        <%= isGain ? '+' : '' %><%= totalGain.toLocaleString('en-TZ', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+      </span>
+      <span class="text-muted" style="font-size: var(--text-xs);"> TZS</span>
+    </div>
+
+    <!-- Gain % -->
+    <div class="col-6 col-md-3">
+      <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Asilimia</p>
+      <span class="d-inline-block tabular-nums fw-700" style="font-size: var(--text-lg); padding: 4px 12px; border-radius: var(--border-radius-full); background: <%= gainBg %>; color: <%= gainColor %>;">
+        <%= isGain ? '+' : '' %><%= totalGainPct.toFixed(2) %>%
+      </span>
+    </div>
+  </div>
+</div>

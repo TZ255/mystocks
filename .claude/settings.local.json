@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:mystocks.africa)",
+      "Bash(node -v && npm -v)",
+      "WebSearch",
+      "Bash(ls /home/shemdoe/Programming/hisa-zangu/node_modules/express/package.json | head -1 && node -e \"const p = require\\('/home/shemdoe/Programming/hisa-zangu/node_modules/express/package.json'\\); console.log\\('Express version:', p.version\\)\")",
+      "Bash(node -e \"const p = require\\('/home/shemdoe/Programming/hisa-zangu/node_modules/express-ejs-layouts/package.json'\\); console.log\\('express-ejs-layouts version:', p.version, '\\\\nmain:', p.main, '\\\\ntype:', p.type || 'commonjs \\(default\\)'\\)\")",
+      "Bash(node -e \"const p = require\\('/home/shemdoe/Programming/hisa-zangu/node_modules/connect-flash/package.json'\\); console.log\\('connect-flash version:', p.version, '\\\\nmain:', p.main, '\\\\ntype:', p.type || 'commonjs \\(default\\)'\\)\")",
+      "Bash(node -e \"\nconst deps = ['passport', 'mongoose', 'express-session', 'connect-mongo', 'dotenv', 'express-rate-limit', 'axios', 'ejs'];\ndeps.forEach\\(d => {\n  try {\n    const p = require\\('/home/shemdoe/Programming/hisa-zangu/node_modules/' + d + '/package.json'\\);\n    console.log\\(d + ': v' + p.version + ' | type: ' + \\(p.type || 'commonjs'\\) + ' | exports: ' + \\(p.exports ? 'yes' : 'no'\\)\\);\n  } catch\\(e\\) { console.log\\(d + ': ERROR - ' + e.message\\); }\n}\\);\n\")",
+      "WebFetch(domain:www.dse.co.tz)",
+      "WebFetch(domain:dse.co.tz)",
+      "WebFetch(domain:www.annualreportstz.com)",
+      "WebFetch(domain:data.dse.co.tz)",
+      "Bash(node -e \"\nconst p = require\\('/home/shemdoe/Programming/hisa-zangu/node_modules/express/package.json'\\);\nconsole.log\\('Express 5 exports:', JSON.stringify\\(p.exports, null, 2\\)\\);\n\" 2>&1 | head -20)",
+      "Bash(node -e \"\n// Check if connect-flash works with Express 5\nconst p = require\\('/home/shemdoe/Programming/hisa-zangu/node_modules/connect-flash/package.json'\\);\nconsole.log\\('connect-flash full:', JSON.stringify\\(p, null, 2\\)\\);\n\" 2>&1 | head -30)",
+      "Bash(node -e \"\n// Check express-ejs-layouts compatibility with Express 5\nconst fs = require\\('fs'\\);\nconst main = fs.readFileSync\\('/home/shemdoe/Programming/hisa-zangu/node_modules/express-ejs-layouts/lib/express-layouts.js', 'utf8'\\);\nconsole.log\\(main.substring\\(0, 1500\\)\\);\n\" 2>&1)",
+      "Bash(node -e \"\n// Check if passport works as ESM default import  \nconst fs = require\\('fs'\\);\nconst main = fs.readFileSync\\('/home/shemdoe/Programming/hisa-zangu/node_modules/passport/lib/index.js', 'utf8'\\);\nconsole.log\\(main.substring\\(0, 500\\)\\);\n\")",
+      "Bash(node -e \"\nconst fs = require\\('fs'\\);\n// Check Express 5 Router changes  \nconst content = fs.readFileSync\\('/home/shemdoe/Programming/hisa-zangu/node_modules/express/lib/express.js', 'utf8'\\);\nconsole.log\\(content.substring\\(0, 800\\)\\);\n\" 2>&1)",
+      "Bash(npm install:*)"
+    ]
+  }
+}

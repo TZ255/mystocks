@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <!-- Upward trending stock line -->
+  <polyline
+    points="4,30 14,22 22,26 36,8"
+    stroke="#F59E0B"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+  <!-- Arrow head at the end of the line -->
+  <polyline
+    points="28,8 36,8 36,16"
+    stroke="#F59E0B"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+  <!-- Subtle base line -->
+  <line
+    x1="4" y1="35"
+    x2="36" y2="35"
+    stroke="#F59E0B"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    opacity="0.3"
+  />
+</svg>
