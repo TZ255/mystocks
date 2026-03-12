@@ -1,0 +1,35 @@
+<% const afStocks = typeof allStocks !== 'undefined' ? allStocks : []; %>
+<form
+  hx-post="/api/alerts/create"
+  hx-target="#alert-list"
+  hx-swap="innerHTML"
+  hx-on::after-request="if(event.detail.successful) this.reset()"
+  class="row g-3 align-items-end"
+>
+  <div class="col-md-3 col-6">
+    <label class="form-label">Stock</label>
+    <select name="symbol" class="form-select" required>
+      <option value="">Select stock...</option>
+      <% afStocks.forEach(function(s) { %>
+        <option value="<%= s.symbol %>"><%= s.symbol %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div class="col-md-3 col-6">
+    <label class="form-label">Condition</label>
+    <select name="condition" class="form-select" required>
+      <option value="above">Price goes above</option>
+      <option value="below">Price drops below</option>
+    </select>
+  </div>
+  <div class="col-md-3 col-6">
+    <label class="form-label">Target Price (TZS)</label>
+    <input type="number" name="targetPrice" class="form-input" placeholder="2,000" min="0" step="0.01" required>
+  </div>
+  <div class="col-md-3 col-6">
+    <button type="submit" class="btn btn-primary w-100">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      Create Alert
+    </button>
+  </div>
+</form>

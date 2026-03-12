@@ -3,10 +3,10 @@ import { fetchLivePrices, fetchAndStoreHistory } from '../services/dseService.js
 import { checkAlerts } from '../services/alertService.js';
 
 export const startStockFetcher = () => {
-  // Initial fetch on startup
+  // Initial fetch on startup: history first (full data), then live prices (latest)
   console.log('Running initial stock data fetch...');
-  fetchLivePrices()
-    .then(() => fetchAndStoreHistory())
+  fetchAndStoreHistory()
+    .then(() => fetchLivePrices())
     .then(() => checkAlerts())
     .catch((err) => console.error('Initial fetch error:', err.message));
 

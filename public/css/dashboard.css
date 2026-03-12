@@ -1,0 +1,324 @@
+/* ==========================================================================
+   HisaZangu — Dashboard & App Pages
+   Styles for authenticated pages: dashboard, portfolio, watchlist, alerts,
+   stock detail, stocks list.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Page Layout
+   -------------------------------------------------------------------------- */
+main {
+  min-height: calc(100vh - 68px);
+}
+
+.page-section {
+  padding: var(--space-8) 0 var(--space-16);
+}
+
+.page-title {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-1);
+}
+
+@media (max-width: 768px) {
+  .page-section {
+    padding: var(--space-4) 0 var(--space-12);
+  }
+
+  .page-title {
+    font-size: var(--text-xl);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Navbar Overrides for App Pages
+   -------------------------------------------------------------------------- */
+.navbar {
+  background: rgba(11, 15, 26, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid var(--border-default) !important;
+}
+
+.navbar .navbar-brand:hover,
+.navbar .navbar-brand:focus {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.navbar-dark .navbar-toggler {
+  border: none;
+  padding: var(--space-2);
+}
+
+.navbar-dark .navbar-toggler:focus {
+  box-shadow: none;
+}
+
+/* Bootstrap collapse on mobile — dark theme */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--border-default);
+  }
+
+  .navbar-nav .nav-link {
+    padding: var(--space-3) var(--space-4) !important;
+    border-radius: var(--border-radius-sm);
+  }
+
+  .navbar-nav .nav-link:hover,
+  .navbar-nav .nav-link.active {
+    background: var(--bg-hover);
+  }
+
+  .dropdown-menu {
+    background: var(--bg-elevated) !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+}
+
+/* Dropdown hover fix */
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Chart Container
+   -------------------------------------------------------------------------- */
+.chart-loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+#stock-chart {
+  position: relative;
+  border-radius: var(--border-radius);
+}
+
+#stock-chart canvas {
+  border-radius: var(--border-radius);
+}
+
+/* --------------------------------------------------------------------------
+   Period Buttons
+   -------------------------------------------------------------------------- */
+.period-btn {
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.period-btn.active,
+.period-btn:hover {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* --------------------------------------------------------------------------
+   HTMX Loading Indicators
+   -------------------------------------------------------------------------- */
+.htmx-indicator {
+  display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Subtle opacity during HTMX requests */
+.htmx-request {
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* Don't dim the whole page for indicator-only elements */
+.htmx-indicator.htmx-request {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --------------------------------------------------------------------------
+   HTMX Swap Transition
+   -------------------------------------------------------------------------- */
+.htmx-swapping-in {
+  opacity: 0;
+}
+
+.htmx-swapping-in > * {
+  animation: fadeInUp 0.3s var(--ease-out) both;
+}
+
+/* --------------------------------------------------------------------------
+   Toast Container
+   -------------------------------------------------------------------------- */
+#toast-container {
+  position: fixed;
+  top: 80px;
+  right: var(--space-6);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  pointer-events: none;
+}
+
+#toast-container .toast {
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateX(20px);
+  transition:
+    opacity var(--duration) var(--ease-out),
+    transform var(--duration) var(--ease-out);
+}
+
+#toast-container .toast.toast-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#toast-container .toast.toast-hiding {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+/* --------------------------------------------------------------------------
+   Table Overrides for Dark Theme
+   -------------------------------------------------------------------------- */
+.table tbody tr {
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.table tbody tr:hover {
+  background: var(--bg-hover) !important;
+  --bs-table-hover-bg: var(--bg-hover);
+}
+
+.table tbody td,
+.table thead th {
+  color: var(--text-primary);
+  border-bottom-color: var(--border-default);
+}
+
+.table thead th {
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Form Overrides for Dark Theme
+   -------------------------------------------------------------------------- */
+.form-select,
+.form-input,
+input[type="date"].form-input {
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  transition:
+    border-color var(--duration) var(--ease-out),
+    box-shadow var(--duration) var(--ease-out);
+}
+
+.form-select:focus,
+.form-input:focus,
+input[type="date"].form-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+  background-color: var(--bg-card);
+}
+
+.form-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.form-label {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-1);
+}
+
+/* Date input styling for dark theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.8);
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   Portfolio Chart Colors
+   -------------------------------------------------------------------------- */
+:root {
+  --chart-color-0: #F59E0B;
+  --chart-color-1: #3B82F6;
+  --chart-color-2: #10B981;
+  --chart-color-3: #EF4444;
+  --chart-color-4: #8B5CF6;
+  --chart-color-5: #EC4899;
+  --chart-color-6: #06B6D4;
+  --chart-color-7: #F97316;
+}
+
+/* --------------------------------------------------------------------------
+   Modal Overrides for Dark Theme
+   -------------------------------------------------------------------------- */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+/* --------------------------------------------------------------------------
+   Holding Card (Mobile)
+   -------------------------------------------------------------------------- */
+.holding-card {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.holding-card:hover {
+  border-color: var(--border-hover);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Dashboard
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  #toast-container {
+    top: var(--space-4);
+    right: var(--space-4);
+    left: var(--space-4);
+  }
+
+  #toast-container .toast {
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Footer hide on mobile for tab bar users
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  body.has-bottom-tabs .site-footer {
+    display: none;
+  }
+}

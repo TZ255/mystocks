@@ -8,23 +8,39 @@ const formatDate = (date) => {
   return date.toISOString().split('T')[0];
 };
 
+/**
+ * Extract the array from DSE API responses.
+ * DSE returns { success: true, data: [...] } not a plain array.
+ */
+const extractArray = (response) => {
+  if (Array.isArray(response)) return response;
+  if (response && Array.isArray(response.data)) return response.data;
+  return null;
+};
+
+/**
+ * Fetch live prices from DSE.
+ * Endpoint returns sparse data: { company, price, change } per stock.
+ * Used for quick updates during trading hours.
+ */
 export const fetchLivePrices = async () => {
   try {
-    const { data } = await axios.get(DSE_ENDPOINTS.livePrices, { timeout: 15000 });
+    const { data: response } = await axios.get(DSE_ENDPOINTS.livePrices, { timeout: 15000 });
 
-    if (!data || !Array.isArray(data)) {
-      console.warn('DSE live prices: unexpected response format');
+    const items = extractArray(response);
+    if (!items) {
+      console.warn('DSE live prices: unexpected response format', typeof response);
       return [];
     }
 
-    const ops = data.map((item) => {
-      const symbol = (item.security_code || item.symbol || '').toUpperCase().trim();
+    const ops = items.map((item) => {
+      const symbol = (item.company || item.security_code || item.symbol || '').toUpperCase().trim();
       if (!symbol) return null;
 
       const companyInfo = getCompanyInfo(symbol);
-      const price = parseFloat(item.close || item.price || 0);
-      const previousClose = parseFloat(item.previous_close || item.prev_close || 0);
-      const change = price - previousClose;
+      const price = parseFloat(item.price || item.close || 0);
+      const change = parseFloat(item.change || 0);
+      const previousClose = price - change;
       const changePercent = previousClose > 0 ? ((change / previousClose) * 100) : 0;
 
       return {
@@ -36,17 +52,10 @@ export const fetchLivePrices = async () => {
               companyName: companyInfo.name,
               sector: companyInfo.sector,
               price,
-              previousClose,
+              previousClose: parseFloat(previousClose.toFixed(2)),
               change: parseFloat(change.toFixed(2)),
               changePercent: parseFloat(changePercent.toFixed(2)),
-              open: parseFloat(item.open || 0),
-              high: parseFloat(item.high || 0),
-              low: parseFloat(item.low || 0),
               close: price,
-              volume: parseInt(item.volume || item.total_volume || 0),
-              deals: parseInt(item.deals || item.total_deals || 0),
-              turnover: parseFloat(item.turnover || item.total_turnover || 0),
-              lastTradeDate: item.trade_date ? new Date(item.trade_date) : new Date(),
               updatedAt: new Date(),
             },
           },
@@ -60,55 +69,109 @@ export const fetchLivePrices = async () => {
       console.log(`Synced ${ops.length} stock prices from DSE`);
     }
 
-    return data;
+    return items;
   } catch (err) {
     console.error('Error fetching DSE live prices:', err.message);
     return [];
   }
 };
 
+/**
+ * Fetch historical/daily prices and store in StockHistory.
+ * Also updates the Stock model with full daily data (open, high, low, volume, etc.)
+ * since the live endpoint only provides price + change.
+ */
 export const fetchAndStoreHistory = async () => {
   try {
     const today = formatDate(new Date());
-    const { data } = await axios.get(DSE_ENDPOINTS.historicalPrices(today), { timeout: 20000 });
+    const { data: response } = await axios.get(DSE_ENDPOINTS.historicalPrices(today), { timeout: 20000 });
 
-    if (!data || !Array.isArray(data)) {
-      console.warn('DSE historical prices: unexpected response format');
+    const items = extractArray(response);
+    if (!items) {
+      console.warn('DSE historical prices: unexpected response format', typeof response);
       return;
     }
 
-    const ops = data.map((item) => {
-      const symbol = (item.security_code || item.symbol || '').toUpperCase().trim();
+    const historyOps = [];
+    const stockOps = [];
+
+    for (const item of items) {
+      const symbol = (item.company || item.security_code || item.symbol || '').toUpperCase().trim();
       const dateStr = item.trade_date || item.date;
-      if (!symbol || !dateStr) return null;
+      if (!symbol || !dateStr) continue;
 
       const date = new Date(dateStr);
       date.setHours(0, 0, 0, 0);
 
-      return {
+      const closingPrice = parseFloat(item.closing_price || item.close || item.price || 0);
+      const openingPrice = parseFloat(item.opening_price || item.open || 0);
+      const high = parseFloat(item.high || 0);
+      const low = parseFloat(item.low || 0);
+      const prevClose = parseFloat(item.prev_close || item.previous_close || 0);
+      const volume = parseInt(item.volume || item.total_volume || 0);
+      const turnover = parseFloat(item.turnover || item.total_turnover || 0);
+      const changePercent = parseFloat(item.change || 0);
+      const change = closingPrice - prevClose;
+
+      // Store in StockHistory
+      historyOps.push({
         updateOne: {
           filter: { symbol, date },
           update: {
             $set: {
               symbol,
               date,
-              open: parseFloat(item.open || 0),
-              high: parseFloat(item.high || 0),
-              low: parseFloat(item.low || 0),
-              close: parseFloat(item.close || item.price || 0),
-              volume: parseInt(item.volume || item.total_volume || 0),
-              turnover: parseFloat(item.turnover || item.total_turnover || 0),
-              deals: parseInt(item.deals || item.total_deals || 0),
+              open: openingPrice,
+              high,
+              low,
+              close: closingPrice,
+              volume,
+              turnover,
+              deals: parseInt(item.deals || 0),
             },
           },
           upsert: true,
         },
-      };
-    }).filter(Boolean);
+      });
 
-    if (ops.length > 0) {
-      await StockHistory.bulkWrite(ops);
-      console.log(`Stored ${ops.length} historical records`);
+      // Also update the Stock model with full daily data
+      const companyInfo = getCompanyInfo(symbol);
+      stockOps.push({
+        updateOne: {
+          filter: { symbol },
+          update: {
+            $set: {
+              symbol,
+              companyName: companyInfo.name,
+              sector: companyInfo.sector,
+              price: closingPrice,
+              previousClose: prevClose,
+              change: parseFloat(change.toFixed(2)),
+              changePercent: parseFloat(changePercent.toFixed(2)),
+              open: openingPrice,
+              high,
+              low,
+              close: closingPrice,
+              volume,
+              turnover,
+              deals: parseInt(item.deals || 0),
+              lastTradeDate: date,
+              updatedAt: new Date(),
+            },
+          },
+          upsert: true,
+        },
+      });
+    }
+
+    if (historyOps.length > 0) {
+      await StockHistory.bulkWrite(historyOps);
+      console.log(`Stored ${historyOps.length} historical records`);
+    }
+
+    if (stockOps.length > 0) {
+      await Stock.bulkWrite(stockOps);
+      console.log(`Updated ${stockOps.length} stocks with full daily data`);
     }
   } catch (err) {
     console.error('Error fetching DSE history:', err.message);

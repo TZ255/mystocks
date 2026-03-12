@@ -16,7 +16,7 @@
 
     // Graceful fallback for browsers without IntersectionObserver
     if (!('IntersectionObserver' in window)) {
-      elements.forEach((el) => el.classList.add('animated'));
+      elements.forEach((el) => el.classList.add('visible'));
       return;
     }
 
@@ -24,7 +24,7 @@
       (entries, obs) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('animated');
+            entry.target.classList.add('visible');
             obs.unobserve(entry.target);
           }
         });

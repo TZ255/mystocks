@@ -1,0 +1,11 @@
+<%
+  const toastMsg = typeof message !== 'undefined' ? message : '';
+  const toastType = typeof type !== 'undefined' ? type : 'info';
+%>
+<% if (toastMsg) { %>
+<script>
+  if (typeof window.showToast === 'function') {
+    window.showToast('<%= toastMsg.replace(/'/g, "\\'") %>', '<%= toastType %>');
+  }
+</script>
+<% } %>

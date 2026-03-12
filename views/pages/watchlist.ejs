@@ -1,0 +1,38 @@
+<%
+  const wlItems = typeof watchlistItems !== 'undefined' ? watchlistItems : [];
+  const wlStocks = typeof stocks !== 'undefined' ? stocks : [];
+%>
+
+<section class="page-section">
+  <div class="container-hisa">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+      <div>
+        <h1 class="page-title">Watchlist</h1>
+        <p class="text-secondary mb-0" style="font-size:var(--text-sm);">Stocks you're watching. Add more from the stocks page.</p>
+      </div>
+      <a href="/stocks" class="btn btn-ghost btn-sm">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Browse Stocks
+      </a>
+    </div>
+
+    <!-- Watchlist Content -->
+    <div class="card" style="padding:var(--space-5);">
+      <div
+        id="watchlist-items"
+        hx-get="/api/watchlist/items"
+        hx-trigger="load"
+        hx-swap="innerHTML"
+        hx-indicator="#wl-loader"
+      >
+        <div class="text-center py-5" id="wl-loader">
+          <span class="spinner"></span>
+          <p class="text-muted mt-3" style="font-size:var(--text-sm);">Loading watchlist...</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

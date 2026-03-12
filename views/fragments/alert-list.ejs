@@ -1,0 +1,40 @@
+<% const alAlerts = typeof alerts !== 'undefined' ? alerts : []; %>
+<% if (alAlerts.length === 0) { %>
+  <div class="empty-state" style="padding:var(--space-10) var(--space-4);">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:var(--space-4);"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+    <p class="empty-state-title">No alerts yet</p>
+    <p class="empty-state-text">Create a price alert to get notified when a stock reaches your target price.</p>
+  </div>
+<% } else { %>
+  <% alAlerts.forEach(function(a) { %>
+    <%
+      const isTriggered = a.triggered;
+      const condText = a.condition === 'above' ? 'Above' : 'Below';
+      const statusColor = isTriggered ? 'var(--green)' : 'var(--gold)';
+      const statusText = isTriggered ? 'Triggered' : 'Pending';
+    %>
+    <div class="d-flex justify-content-between align-items-center" style="padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border-default);">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <a href="/stocks/<%= a.symbol %>" class="fw-700" style="font-size:var(--text-sm);color:var(--text-primary);text-decoration:none;min-width:55px;"><%= a.symbol %></a>
+        <span class="text-secondary" style="font-size:var(--text-xs);">
+          <%= condText %> <span class="tabular-nums fw-600" style="color:var(--text-primary);"><%= a.targetPrice.toLocaleString('en-TZ') %></span> TZS
+        </span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge" style="font-size:10px;padding:2px 8px;border-radius:var(--border-radius-full);background:rgba(255,255,255,0.05);color:<%= statusColor %>;border:1px solid <%= statusColor %>33;">
+          <%= statusText %>
+        </span>
+        <button
+          class="btn btn-icon btn-sm btn-ghost"
+          hx-delete="/api/alerts/remove/<%= a._id %>"
+          hx-target="#alert-list"
+          hx-swap="innerHTML"
+          hx-indicator="closest div"
+          title="Remove alert"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+  <% }); %>
+<% } %>

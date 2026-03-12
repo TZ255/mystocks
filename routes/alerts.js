@@ -14,13 +14,13 @@ router.get('/', ensureAuthenticated, async (req, res) => {
     const allStocks = await Stock.find().sort({ symbol: 1 }).lean();
 
     res.render('pages/alerts', {
-      title: 'Arifa za Bei - HisaZangu',
+      title: 'Price Alerts - HisaZangu',
       alerts,
       allStocks,
     });
   } catch (err) {
     console.error('Alerts error:', err);
-    req.flash('error_msg', 'Hitilafu katika kupakia arifa');
+    req.flash('error_msg', 'Error loading alerts');
     res.redirect('/dashboard');
   }
 });

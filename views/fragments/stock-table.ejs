@@ -1,0 +1,38 @@
+<% const tblStocks = typeof stocks !== 'undefined' ? stocks : []; %>
+<% if (tblStocks.length === 0) { %>
+  <tr>
+    <td colspan="6" class="text-center text-muted" style="padding: var(--space-8);">No stock data available.</td>
+  </tr>
+<% } else { %>
+  <% tblStocks.forEach(function(s) { %>
+    <%
+      const ch = s.changePercent || 0;
+      const isUp = ch > 0;
+      const isDown = ch < 0;
+      const colorCls = isUp ? 'text-green' : isDown ? 'text-red' : 'text-muted';
+      const prefix = isUp ? '+' : '';
+    %>
+    <tr style="cursor:pointer;" onclick="window.location='/stocks/<%= s.symbol %>'">
+      <td style="padding:var(--space-3) var(--space-5);">
+        <span class="fw-700" style="font-size:var(--text-sm);"><%= s.symbol %></span>
+      </td>
+      <td style="padding:var(--space-3) var(--space-5);">
+        <span class="text-secondary" style="font-size:var(--text-sm);"><%= s.companyName || s.symbol %></span>
+      </td>
+      <td class="text-end" style="padding:var(--space-3) var(--space-5);">
+        <span class="tabular-nums fw-600" style="font-size:var(--text-sm);"><%= s.price ? s.price.toLocaleString('en-TZ') : '0' %></span>
+      </td>
+      <td class="text-end" style="padding:var(--space-3) var(--space-5);">
+        <span class="tabular-nums <%= colorCls %>" style="font-size:var(--text-sm);"><%= prefix %><%= s.change ? s.change.toFixed(2) : '0.00' %></span>
+      </td>
+      <td class="text-end" style="padding:var(--space-3) var(--space-5);">
+        <span class="badge" style="font-size:var(--text-xs);padding:3px 8px;border-radius:var(--border-radius-full);background:<%= isUp ? 'rgba(16,185,129,0.15)' : isDown ? 'rgba(239,68,68,0.15)' : 'rgba(156,163,175,0.1)' %>;color:<%= isUp ? 'var(--green)' : isDown ? 'var(--red)' : 'var(--text-muted)' %>;">
+          <%= prefix %><%= ch.toFixed(2) %>%
+        </span>
+      </td>
+      <td class="text-end d-none d-md-table-cell" style="padding:var(--space-3) var(--space-5);">
+        <span class="tabular-nums text-secondary" style="font-size:var(--text-sm);"><%= s.volume ? s.volume.toLocaleString('en-TZ') : '0' %></span>
+      </td>
+    </tr>
+  <% }); %>
+<% } %>

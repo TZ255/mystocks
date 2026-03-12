@@ -8,39 +8,39 @@
   const gainColor = isGain ? 'var(--green)' : 'var(--red)';
   const gainBg = isGain ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
 %>
-<div class="portfolio-summary glass-strong" style="border-radius: var(--border-radius-lg); padding: var(--space-8); border: 1px solid var(--border-default);">
-  <div class="row g-4">
+<div class="portfolio-summary glass-strong" style="border-radius:var(--border-radius-lg);padding:var(--space-6);border:1px solid var(--border-default);">
+  <div class="row g-3">
     <!-- Total Value -->
     <div class="col-6 col-md-3">
-      <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Thamani ya Sasa</p>
-      <span class="tabular-nums fw-700" style="font-size: var(--text-2xl); color: var(--text-primary);">
-        <%= totalValue.toLocaleString('en-TZ', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+      <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Current Value</p>
+      <span class="tabular-nums fw-700" style="font-size:var(--text-xl);color:var(--text-primary);">
+        <%= totalValue.toLocaleString('en-TZ', {maximumFractionDigits:0}) %>
       </span>
-      <span class="text-muted" style="font-size: var(--text-xs);"> TZS</span>
+      <span class="text-muted" style="font-size:10px;"> TZS</span>
     </div>
 
     <!-- Total Invested -->
     <div class="col-6 col-md-3">
-      <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Uwekezaji</p>
-      <span class="tabular-nums fw-600" style="font-size: var(--text-xl); color: var(--text-primary);">
-        <%= totalInvested.toLocaleString('en-TZ', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+      <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Invested</p>
+      <span class="tabular-nums fw-600" style="font-size:var(--text-lg);color:var(--text-primary);">
+        <%= totalInvested.toLocaleString('en-TZ', {maximumFractionDigits:0}) %>
       </span>
-      <span class="text-muted" style="font-size: var(--text-xs);"> TZS</span>
+      <span class="text-muted" style="font-size:10px;"> TZS</span>
     </div>
 
     <!-- Gain / Loss -->
     <div class="col-6 col-md-3">
-      <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Faida / Hasara</p>
-      <span class="tabular-nums fw-700" style="font-size: var(--text-xl); color: <%= gainColor %>;">
-        <%= isGain ? '+' : '' %><%= totalGain.toLocaleString('en-TZ', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+      <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Profit / Loss</p>
+      <span class="tabular-nums fw-700" style="font-size:var(--text-lg);color:<%= gainColor %>;">
+        <%= isGain ? '+' : '' %><%= totalGain.toLocaleString('en-TZ', {maximumFractionDigits:0}) %>
       </span>
-      <span class="text-muted" style="font-size: var(--text-xs);"> TZS</span>
+      <span class="text-muted" style="font-size:10px;"> TZS</span>
     </div>
 
     <!-- Gain % -->
     <div class="col-6 col-md-3">
-      <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Asilimia</p>
-      <span class="d-inline-block tabular-nums fw-700" style="font-size: var(--text-lg); padding: 4px 12px; border-radius: var(--border-radius-full); background: <%= gainBg %>; color: <%= gainColor %>;">
+      <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Return</p>
+      <span class="d-inline-block tabular-nums fw-700" style="font-size:var(--text-base);padding:4px 12px;border-radius:var(--border-radius-full);background:<%= gainBg %>;color:<%= gainColor %>;">
         <%= isGain ? '+' : '' %><%= totalGainPct.toFixed(2) %>%
       </span>
     </div>

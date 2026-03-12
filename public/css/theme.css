@@ -45,7 +45,7 @@
   --text-primary:     #F9FAFB;
   --text-secondary:   #9CA3AF;
   --text-tertiary:    #6B7280;
-  --text-muted:       #4B5563;
+  --text-muted:       #6B7280;
 
   /* ---- Borders ---- */
   --border-default:   rgba(255, 255, 255, 0.06);
@@ -313,6 +313,16 @@ select {
 /* --------------------------------------------------------------------------
    Utility: Text Colors
    -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+   Utility: Font Weights
+   -------------------------------------------------------------------------- */
+.fw-400 { font-weight: 400; }
+.fw-500 { font-weight: 500; }
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+.fw-800 { font-weight: 800; }
+.fw-900 { font-weight: 900; }
+
 .text-gold      { color: var(--gold); }
 .text-green     { color: var(--green); }
 .text-red       { color: var(--red); }
@@ -533,6 +543,84 @@ select {
   html {
     font-size: 14px;
   }
+}
+
+/* --------------------------------------------------------------------------
+   Bootstrap 5 Dark Theme Overrides
+   Bootstrap loads first with light defaults — override all conflicting vars.
+   -------------------------------------------------------------------------- */
+:root {
+  --bs-body-color:          var(--text-primary);
+  --bs-body-bg:             var(--bg-primary);
+  --bs-secondary-color:     var(--text-secondary);
+  --bs-tertiary-color:      var(--text-tertiary);
+  --bs-emphasis-color:      var(--text-primary);
+  --bs-border-color:        var(--border-default);
+
+  /* Tables */
+  --bs-table-bg:            transparent;
+  --bs-table-color:         var(--text-primary);
+  --bs-table-striped-bg:    rgba(255, 255, 255, 0.02);
+  --bs-table-striped-color: var(--text-primary);
+  --bs-table-hover-bg:      var(--bg-hover);
+  --bs-table-hover-color:   var(--text-primary);
+  --bs-table-active-bg:     var(--bg-hover);
+  --bs-table-active-color:  var(--text-primary);
+  --bs-table-border-color:  var(--border-default);
+
+  /* Cards */
+  --bs-card-bg:             var(--bg-card);
+  --bs-card-color:          var(--text-primary);
+  --bs-card-border-color:   var(--border-default);
+  --bs-card-cap-bg:         var(--bg-hover);
+
+  /* Links */
+  --bs-link-color:          var(--blue);
+  --bs-link-hover-color:    var(--blue-light);
+}
+
+/* Force Bootstrap's .text-muted to use our value */
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Ensure Bootstrap tables are fully dark */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--text-primary);
+  --bs-table-border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.table > :not(caption) > * > * {
+  background-color: transparent;
+  color: var(--text-primary);
+  border-bottom-color: var(--border-default);
+  box-shadow: none;
+}
+
+.table thead th {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+/* Bootstrap modal dark overrides */
+.modal-content {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+}
+
+.modal-header {
+  border-bottom-color: var(--border-default);
+}
+
+.modal-footer {
+  border-top-color: var(--border-default);
+}
+
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 /* --------------------------------------------------------------------------

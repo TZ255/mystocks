@@ -6,7 +6,6 @@ import Portfolio from '../models/Portfolio.js';
 import Watchlist from '../models/Watchlist.js';
 import Alert from '../models/Alert.js';
 import { calculatePortfolioSummary } from '../services/portfolioService.js';
-import { getCompanyInfo } from '../config/dseCompanies.js';
 
 const router = Router();
 
@@ -16,6 +15,25 @@ const verifyHtmx = (req, res, next) => {
     return res.status(403).send('Forbidden');
   }
   next();
+};
+
+// Helper: fetch and render portfolio holdings
+const renderPortfolioHoldings = async (req, res) => {
+  const holdings = await Portfolio.find({ user: req.user._id }).lean();
+  const symbols = holdings.map((h) => h.symbol);
+  const stocks = await Stock.find({ symbol: { $in: symbols } }).lean();
+  const stockMap = {};
+  stocks.forEach((s) => (stockMap[s.symbol] = s));
+  const portfolioSummary = calculatePortfolioSummary(holdings, stockMap);
+  const allStocks = await Stock.find().sort({ symbol: 1 }).lean();
+
+  res.render('fragments/portfolio-holdings', {
+    layout: false,
+    holdings,
+    stockMap,
+    portfolioSummary,
+    allStocks,
+  });
 };
 
 // ── Market ──
@@ -39,7 +57,7 @@ router.get('/market/overview', async (req, res) => {
       totalStocks: stocks.length,
     });
   } catch (err) {
-    res.status(500).send('<p class="text-danger">Hitilafu katika kupakia data</p>');
+    res.status(500).send('<p class="text-red">Failed to load market data</p>');
   }
 });
 
@@ -53,7 +71,7 @@ router.get('/stocks/table', async (req, res) => {
 
     res.render('fragments/stock-table', { layout: false, stocks });
   } catch (err) {
-    res.status(500).send('<p class="text-danger">Hitilafu</p>');
+    res.status(500).send('<p class="text-red">Error loading stocks</p>');
   }
 });
 
@@ -97,7 +115,7 @@ router.get('/stocks/:symbol/chart', async (req, res) => {
       volumes: data.map((d) => d.volume),
     });
   } catch (err) {
-    res.status(500).json({ error: 'Hitilafu' });
+    res.status(500).json({ error: 'Error loading chart data' });
   }
 });
 
@@ -124,7 +142,7 @@ router.post('/watchlist/toggle/:symbol', ensureAuthenticated, verifyHtmx, async 
       await Watchlist.deleteOne({ _id: existing._id });
       res.render('fragments/toast', {
         layout: false,
-        message: `${symbol} imeondolewa kwenye watchlist`,
+        message: `${symbol} removed from watchlist`,
         type: 'info',
         isWatched: false,
         symbol,
@@ -133,7 +151,7 @@ router.post('/watchlist/toggle/:symbol', ensureAuthenticated, verifyHtmx, async 
       await Watchlist.create({ user: req.user._id, symbol });
       res.render('fragments/toast', {
         layout: false,
-        message: `${symbol} imeongezwa kwenye watchlist`,
+        message: `${symbol} added to watchlist`,
         type: 'success',
         isWatched: true,
         symbol,
@@ -142,7 +160,7 @@ router.post('/watchlist/toggle/:symbol', ensureAuthenticated, verifyHtmx, async 
   } catch (err) {
     res.status(500).render('fragments/toast', {
       layout: false,
-      message: 'Hitilafu imetokea',
+      message: 'An error occurred',
       type: 'error',
       isWatched: false,
       symbol: req.params.symbol,
@@ -158,79 +176,146 @@ router.get('/watchlist/items', ensureAuthenticated, async (req, res) => {
     const stocks = await Stock.find({ symbol: { $in: symbols } }).lean();
     res.render('fragments/watchlist-items', { layout: false, stocks });
   } catch (err) {
-    res.status(500).send('<p class="text-danger">Hitilafu</p>');
+    res.status(500).send('<p class="text-red">Error loading watchlist</p>');
   }
 });
 
-// ── Portfolio ──
+// ── Portfolio: Buy / Add ──
 router.post('/portfolio/add', ensureAuthenticated, verifyHtmx, async (req, res) => {
   try {
-    const { symbol, shares, avgBuyPrice, notes } = req.body;
+    const { symbol, shares, avgBuyPrice, purchaseDate, notes } = req.body;
 
     if (!symbol || !shares || !avgBuyPrice) {
       return res.status(400).render('fragments/toast', {
         layout: false,
-        message: 'Tafadhali jaza taarifa zote',
+        message: 'Please fill in all required fields',
         type: 'error',
       });
     }
 
-    await Portfolio.findOneAndUpdate(
-      { user: req.user._id, symbol: symbol.toUpperCase() },
-      {
+    const shareCount = parseFloat(shares);
+    const buyPrice = parseFloat(avgBuyPrice);
+    const date = purchaseDate ? new Date(purchaseDate) : new Date();
+
+    const existing = await Portfolio.findOne({ user: req.user._id, symbol: symbol.toUpperCase() });
+
+    if (existing) {
+      // Average up: recalculate weighted average buy price
+      const totalOldCost = existing.shares * existing.avgBuyPrice;
+      const totalNewCost = shareCount * buyPrice;
+      const newTotalShares = existing.shares + shareCount;
+      const newAvgPrice = (totalOldCost + totalNewCost) / newTotalShares;
+
+      existing.shares = newTotalShares;
+      existing.avgBuyPrice = parseFloat(newAvgPrice.toFixed(2));
+      existing.transactions.push({
+        type: 'buy',
+        shares: shareCount,
+        price: buyPrice,
+        date,
+        notes: notes || '',
+      });
+      await existing.save();
+    } else {
+      await Portfolio.create({
         user: req.user._id,
         symbol: symbol.toUpperCase(),
-        shares: parseFloat(shares),
-        avgBuyPrice: parseFloat(avgBuyPrice),
+        shares: shareCount,
+        avgBuyPrice: buyPrice,
+        purchaseDate: date,
         notes: notes || '',
-      },
-      { upsert: true, new: true }
-    );
+        transactions: [{
+          type: 'buy',
+          shares: shareCount,
+          price: buyPrice,
+          date,
+          notes: notes || '',
+        }],
+      });
+    }
 
-    // Return updated holdings
-    const holdings = await Portfolio.find({ user: req.user._id }).lean();
-    const symbols = holdings.map((h) => h.symbol);
-    const stocks = await Stock.find({ symbol: { $in: symbols } }).lean();
-    const stockMap = {};
-    stocks.forEach((s) => (stockMap[s.symbol] = s));
-    const portfolioSummary = calculatePortfolioSummary(holdings, stockMap);
-
-    res.render('fragments/portfolio-holdings', {
-      layout: false,
-      holdings,
-      stockMap,
-      portfolioSummary,
-    });
+    await renderPortfolioHoldings(req, res);
   } catch (err) {
+    console.error('Portfolio add error:', err);
     res.status(500).render('fragments/toast', {
       layout: false,
-      message: 'Hitilafu katika kuongeza hisa',
+      message: 'Error adding stock to portfolio',
       type: 'error',
     });
   }
 });
 
+// ── Portfolio: Sell ──
+router.post('/portfolio/sell', ensureAuthenticated, verifyHtmx, async (req, res) => {
+  try {
+    const { symbol, shares, sellPrice, notes } = req.body;
+
+    if (!symbol || !shares || !sellPrice) {
+      return res.status(400).render('fragments/toast', {
+        layout: false,
+        message: 'Please fill in all required fields',
+        type: 'error',
+      });
+    }
+
+    const shareCount = parseFloat(shares);
+    const price = parseFloat(sellPrice);
+
+    const holding = await Portfolio.findOne({ user: req.user._id, symbol: symbol.toUpperCase() });
+
+    if (!holding) {
+      return res.status(400).render('fragments/toast', {
+        layout: false,
+        message: `You don't own any ${symbol} shares`,
+        type: 'error',
+      });
+    }
+
+    if (shareCount > holding.shares) {
+      return res.status(400).render('fragments/toast', {
+        layout: false,
+        message: `You only own ${holding.shares.toLocaleString()} shares of ${symbol}`,
+        type: 'error',
+      });
+    }
+
+    // Record the transaction
+    holding.transactions.push({
+      type: 'sell',
+      shares: shareCount,
+      price,
+      date: new Date(),
+      notes: notes || '',
+    });
+
+    if (shareCount === holding.shares) {
+      // Sold all shares — remove the holding
+      await Portfolio.deleteOne({ _id: holding._id });
+    } else {
+      holding.shares -= shareCount;
+      await holding.save();
+    }
+
+    await renderPortfolioHoldings(req, res);
+  } catch (err) {
+    console.error('Portfolio sell error:', err);
+    res.status(500).render('fragments/toast', {
+      layout: false,
+      message: 'Error processing sale',
+      type: 'error',
+    });
+  }
+});
+
+// ── Portfolio: Remove Holding ──
 router.delete('/portfolio/remove/:id', ensureAuthenticated, verifyHtmx, async (req, res) => {
   try {
     await Portfolio.deleteOne({ _id: req.params.id, user: req.user._id });
-
-    const holdings = await Portfolio.find({ user: req.user._id }).lean();
-    const symbols = holdings.map((h) => h.symbol);
-    const stocks = await Stock.find({ symbol: { $in: symbols } }).lean();
-    const stockMap = {};
-    stocks.forEach((s) => (stockMap[s.symbol] = s));
-    const portfolioSummary = calculatePortfolioSummary(holdings, stockMap);
-
-    res.render('fragments/portfolio-holdings', {
-      layout: false,
-      holdings,
-      stockMap,
-      portfolioSummary,
-    });
+    await renderPortfolioHoldings(req, res);
   } catch (err) {
     res.status(500).render('fragments/toast', {
       layout: false,
-      message: 'Hitilafu katika kuondoa hisa',
+      message: 'Error removing holding',
       type: 'error',
     });
   }
@@ -246,6 +331,31 @@ router.get('/portfolio/form', ensureAuthenticated, async (req, res) => {
   }
 });
 
+// ── Portfolio Chart Data (allocation) ──
+router.get('/portfolio/chart-data', ensureAuthenticated, async (req, res) => {
+  try {
+    const holdings = await Portfolio.find({ user: req.user._id }).lean();
+    const symbols = holdings.map((h) => h.symbol);
+    const stocks = await Stock.find({ symbol: { $in: symbols } }).lean();
+    const stockMap = {};
+    stocks.forEach((s) => (stockMap[s.symbol] = s));
+    const summary = calculatePortfolioSummary(holdings, stockMap);
+
+    res.json({
+      allocation: summary.sectorData,
+      holdings: summary.holdings.map((h) => ({
+        symbol: h.symbol,
+        value: h.currentValue,
+        percent: summary.totalCurrentValue > 0
+          ? parseFloat(((h.currentValue / summary.totalCurrentValue) * 100).toFixed(1))
+          : 0,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error loading chart data' });
+  }
+});
+
 // ── Alerts ──
 router.post('/alerts/create', ensureAuthenticated, verifyHtmx, async (req, res) => {
   try {
@@ -254,7 +364,7 @@ router.post('/alerts/create', ensureAuthenticated, verifyHtmx, async (req, res) 
     if (!symbol || !condition || !targetPrice) {
       return res.status(400).render('fragments/toast', {
         layout: false,
-        message: 'Tafadhali jaza taarifa zote',
+        message: 'Please fill in all fields',
         type: 'error',
       });
     }
@@ -271,7 +381,7 @@ router.post('/alerts/create', ensureAuthenticated, verifyHtmx, async (req, res) 
   } catch (err) {
     res.status(500).render('fragments/toast', {
       layout: false,
-      message: 'Hitilafu katika kuunda arifa',
+      message: 'Error creating alert',
       type: 'error',
     });
   }
@@ -285,7 +395,7 @@ router.delete('/alerts/remove/:id', ensureAuthenticated, verifyHtmx, async (req,
   } catch (err) {
     res.status(500).render('fragments/toast', {
       layout: false,
-      message: 'Hitilafu katika kuondoa arifa',
+      message: 'Error removing alert',
       type: 'error',
     });
   }

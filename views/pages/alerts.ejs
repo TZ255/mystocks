@@ -1,0 +1,69 @@
+<%
+  const pgAlerts = typeof alerts !== 'undefined' ? alerts : [];
+  const pgAllStocks = typeof allStocks !== 'undefined' ? allStocks : [];
+%>
+
+<section class="page-section">
+  <div class="container-hisa">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <h1 class="page-title">Price Alerts</h1>
+        <p class="text-secondary mb-0" style="font-size:var(--text-sm);">Get notified when stock prices reach your target levels.</p>
+      </div>
+    </div>
+
+    <!-- Create Alert Form -->
+    <div class="card mb-4" style="padding:var(--space-5);">
+      <h6 class="mb-3 d-flex align-items-center gap-2" style="font-weight:700;font-size:var(--text-sm);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        Create New Alert
+      </h6>
+      <form
+        hx-post="/api/alerts/create"
+        hx-target="#alert-list"
+        hx-swap="innerHTML"
+        hx-indicator="#alert-indicator"
+        hx-on::after-request="if(event.detail.successful) this.reset()"
+        class="row g-3 align-items-end"
+      >
+        <div class="col-md-3 col-6">
+          <label class="form-label">Stock</label>
+          <select name="symbol" class="form-select" required>
+            <option value="">Select stock...</option>
+            <% pgAllStocks.forEach(function(s) { %>
+              <option value="<%= s.symbol %>"><%= s.symbol %> — <%= s.companyName || s.symbol %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-3 col-6">
+          <label class="form-label">Condition</label>
+          <select name="condition" class="form-select" required>
+            <option value="above">Price goes above</option>
+            <option value="below">Price drops below</option>
+          </select>
+        </div>
+        <div class="col-md-3 col-6">
+          <label class="form-label">Target Price (TZS)</label>
+          <input type="number" name="targetPrice" class="form-input" placeholder="2,000" min="0" step="0.01" required>
+        </div>
+        <div class="col-md-3 col-6">
+          <button type="submit" class="btn btn-primary w-100">
+            <span class="htmx-indicator me-2" id="alert-indicator"><span class="spinner spinner-sm"></span></span>
+            Create Alert
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Alerts List -->
+    <div class="card" style="padding:var(--space-5);">
+      <h6 class="mb-3" style="font-weight:700;font-size:var(--text-sm);">Your Alerts</h6>
+      <div id="alert-list">
+        <%- include('../fragments/alert-list', { alerts: pgAlerts }) %>
+      </div>
+    </div>
+
+  </div>
+</section>

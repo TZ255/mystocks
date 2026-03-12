@@ -11,12 +11,12 @@ router.get('/', async (req, res) => {
   try {
     const stocks = await Stock.find().sort({ symbol: 1 }).lean();
     res.render('pages/stocks', {
-      title: 'Hisa za DSE - HisaZangu',
+      title: 'DSE Stocks - HisaZangu',
       stocks,
     });
   } catch (err) {
     console.error('Stocks page error:', err);
-    res.render('pages/stocks', { title: 'Hisa za DSE - HisaZangu', stocks: [] });
+    res.render('pages/stocks', { title: 'DSE Stocks - HisaZangu', stocks: [] });
   }
 });
 
@@ -28,8 +28,8 @@ router.get('/:symbol', async (req, res) => {
 
     if (!stock) {
       return res.status(404).render('pages/error', {
-        title: 'Hisa Haipatikani',
-        message: `Hisa "${symbol}" haipatikani.`,
+        title: 'Stock Not Found',
+        message: `Stock "${symbol}" was not found.`,
         code: 404,
       });
     }
@@ -57,8 +57,8 @@ router.get('/:symbol', async (req, res) => {
   } catch (err) {
     console.error('Stock detail error:', err);
     res.status(500).render('pages/error', {
-      title: 'Hitilafu',
-      message: 'Hitilafu katika kupakia taarifa za hisa.',
+      title: 'Error',
+      message: 'Error loading stock information.',
       code: 500,
     });
   }

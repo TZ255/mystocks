@@ -1,0 +1,25 @@
+<%
+  const tkStocks = typeof stocks !== 'undefined' ? stocks : [];
+%>
+<% if (tkStocks.length > 0) { %>
+  <div class="ticker-strip">
+    <div class="ticker-track">
+      <% /* Duplicate items for seamless infinite scroll */ %>
+      <% for (let i = 0; i < 2; i++) { %>
+        <% tkStocks.forEach(function(s) { %>
+          <%
+            const ch = s.changePercent || 0;
+            const isUp = ch > 0;
+            const prefix = isUp ? '+' : '';
+            const dirClass = isUp ? 'up' : ch < 0 ? 'down' : '';
+          %>
+          <a href="/stocks/<%= s.symbol %>" class="ticker-item" style="text-decoration:none;">
+            <span class="ticker-symbol"><%= s.symbol %></span>
+            <span class="ticker-price"><%= s.price ? s.price.toLocaleString('en-TZ') : '0' %></span>
+            <span class="ticker-change <%= dirClass %>"><%= prefix %><%= ch.toFixed(2) %>%</span>
+          </a>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+<% } %>

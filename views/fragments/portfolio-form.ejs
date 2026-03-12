@@ -1,0 +1,36 @@
+<% const pfStocks = typeof allStocks !== 'undefined' ? allStocks : []; %>
+<form
+  hx-post="/api/portfolio/add"
+  hx-target="#portfolio-holdings"
+  hx-swap="innerHTML"
+  hx-on::after-request="if(event.detail.successful) this.reset()"
+  class="row g-3 align-items-end"
+>
+  <div class="col-md-3 col-6">
+    <label class="form-label">Stock</label>
+    <select name="symbol" class="form-select" required>
+      <option value="">Select stock...</option>
+      <% pfStocks.forEach(function(s) { %>
+        <option value="<%= s.symbol %>"><%= s.symbol %> - <%= s.companyName || s.symbol %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div class="col-md-2 col-6">
+    <label class="form-label">Shares</label>
+    <input type="number" name="shares" class="form-input" placeholder="100" min="1" required>
+  </div>
+  <div class="col-md-3 col-6">
+    <label class="form-label">Buy Price (TZS)</label>
+    <input type="number" name="avgBuyPrice" class="form-input" placeholder="1,500" min="0" step="0.01" required>
+  </div>
+  <div class="col-md-2 col-6">
+    <label class="form-label">Notes</label>
+    <input type="text" name="notes" class="form-input" placeholder="Optional...">
+  </div>
+  <div class="col-md-2 col-12">
+    <button type="submit" class="btn btn-primary w-100">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Add
+    </button>
+  </div>
+</form>

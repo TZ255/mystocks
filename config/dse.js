@@ -13,7 +13,7 @@ export const DSE_ENDPOINTS = {
 
 export const DSE_TRADING_HOURS = {
   open: 10,  // 10:00 EAT
-  close: 14, // 14:00 EAT
+  close: 16, // 16:00 EAT
   timezone: 'Africa/Dar_es_Salaam',
   days: [1, 2, 3, 4, 5], // Mon-Fri
 };

@@ -1,0 +1,146 @@
+<%
+  const phHoldings = typeof holdings !== 'undefined' ? holdings : [];
+  const phStockMap = typeof stockMap !== 'undefined' ? stockMap : {};
+  const phSummary = typeof portfolioSummary !== 'undefined' ? portfolioSummary : {};
+  const phEnriched = phSummary.holdings || [];
+%>
+
+<!-- Portfolio Summary -->
+<% if (phHoldings.length > 0) { %>
+  <%- include('../partials/portfolio-summary', { portfolioSummary: phSummary }) %>
+<% } %>
+
+<!-- Holdings Table -->
+<div style="margin-top:var(--space-5);">
+  <h6 class="mb-3 d-flex align-items-center justify-content-between" style="font-weight:600;font-size:var(--text-sm);color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;">
+    <span>Holdings (<%= phHoldings.length %>)</span>
+  </h6>
+
+  <% if (phHoldings.length === 0) { %>
+    <div class="empty-state" style="padding:var(--space-10) 0;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:var(--space-4);"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+      <p class="empty-state-title">No holdings yet</p>
+      <p class="empty-state-text">Add your first stock to start tracking your portfolio.</p>
+    </div>
+  <% } else { %>
+
+    <!-- Mobile Cards (visible < md) -->
+    <div class="d-md-none">
+      <% phEnriched.forEach(function(h) { %>
+        <%
+          const isGain = (h.gainPercent || 0) >= 0;
+          const gainColor = isGain ? 'var(--green)' : 'var(--red)';
+          const gainPrefix = isGain ? '+' : '';
+          const dailyUp = (h.changePercent || 0) > 0;
+          const dailyColor = dailyUp ? 'var(--green)' : (h.changePercent || 0) < 0 ? 'var(--red)' : 'var(--text-muted)';
+        %>
+        <div class="holding-card" style="background:var(--bg-hover);border-radius:var(--border-radius);padding:var(--space-4);margin-bottom:var(--space-3);border:1px solid var(--border-default);">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <a href="/stocks/<%= h.symbol %>" style="text-decoration:none;">
+              <span class="fw-700" style="font-size:var(--text-base);color:var(--text-primary);"><%= h.symbol %></span>
+              <span class="d-block text-secondary" style="font-size:var(--text-xs);"><%= h.companyName || h.symbol %></span>
+            </a>
+            <span class="badge" style="background:<%= isGain ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)' %>;color:<%= gainColor %>;font-size:var(--text-xs);padding:4px 10px;border-radius:var(--border-radius-full);">
+              <%= gainPrefix %><%= (h.gainPercent || 0).toFixed(2) %>%
+            </span>
+          </div>
+          <div class="row g-2" style="font-size:var(--text-xs);">
+            <div class="col-4">
+              <span class="text-muted d-block">Shares</span>
+              <span class="fw-600 tabular-nums"><%= h.shares.toLocaleString('en-TZ') %></span>
+            </div>
+            <div class="col-4">
+              <span class="text-muted d-block">Price</span>
+              <span class="fw-600 tabular-nums"><%= h.currentPrice ? h.currentPrice.toLocaleString('en-TZ') : '0' %></span>
+            </div>
+            <div class="col-4 text-end">
+              <span class="text-muted d-block">Value</span>
+              <span class="fw-600 tabular-nums"><%= h.currentValue ? h.currentValue.toLocaleString('en-TZ', {maximumFractionDigits:0}) : '0' %></span>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2" style="border-top:1px solid var(--border-default);">
+            <span class="tabular-nums" style="font-size:var(--text-xs);color:<%= dailyColor %>;">Today: <%= dailyUp ? '+' : '' %><%= (h.changePercent || 0).toFixed(2) %>%</span>
+            <button
+              class="btn btn-icon btn-sm btn-ghost"
+              hx-delete="/api/portfolio/remove/<%= h._id %>"
+              hx-target="#portfolio-holdings"
+              hx-swap="innerHTML"
+              hx-confirm="Remove <%= h.symbol %> from portfolio?"
+              hx-indicator="closest .holding-card"
+              title="Remove"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+    <!-- Desktop Table (visible >= md) -->
+    <div class="d-none d-md-block table-container">
+      <table class="table" style="background:transparent;--bs-table-bg:transparent;">
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th class="text-end">Shares</th>
+            <th class="text-end">Avg Cost</th>
+            <th class="text-end">Price</th>
+            <th class="text-end">Value</th>
+            <th class="text-end">P&L</th>
+            <th class="text-end">Today</th>
+            <th style="width:40px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% phEnriched.forEach(function(h) { %>
+            <%
+              const isGain = (h.gainPercent || 0) >= 0;
+              const gainColor = isGain ? 'var(--green)' : 'var(--red)';
+              const gainPrefix = isGain ? '+' : '';
+              const dailyUp = (h.changePercent || 0) > 0;
+              const dailyColor = dailyUp ? 'var(--green)' : (h.changePercent || 0) < 0 ? 'var(--red)' : 'var(--text-muted)';
+            %>
+            <tr>
+              <td>
+                <a href="/stocks/<%= h.symbol %>" style="text-decoration:none;color:var(--text-primary);">
+                  <span class="fw-700" style="font-size:var(--text-sm);"><%= h.symbol %></span>
+                  <span class="d-block text-secondary" style="font-size:10px;"><%= h.companyName || '' %></span>
+                </a>
+              </td>
+              <td class="text-end tabular-nums" style="font-size:var(--text-sm);"><%= h.shares.toLocaleString('en-TZ') %></td>
+              <td class="text-end tabular-nums text-secondary" style="font-size:var(--text-sm);"><%= h.avgBuyPrice ? h.avgBuyPrice.toLocaleString('en-TZ') : '0' %></td>
+              <td class="text-end tabular-nums" style="font-size:var(--text-sm);"><%= h.currentPrice ? h.currentPrice.toLocaleString('en-TZ') : '0' %></td>
+              <td class="text-end tabular-nums fw-600" style="font-size:var(--text-sm);"><%= h.currentValue ? h.currentValue.toLocaleString('en-TZ', {maximumFractionDigits:0}) : '0' %></td>
+              <td class="text-end">
+                <span class="tabular-nums fw-600" style="font-size:var(--text-sm);color:<%= gainColor %>;">
+                  <%= gainPrefix %><%= (h.gain || 0).toLocaleString('en-TZ', {maximumFractionDigits:0}) %>
+                </span>
+                <span class="d-block tabular-nums" style="font-size:10px;color:<%= gainColor %>;">
+                  <%= gainPrefix %><%= (h.gainPercent || 0).toFixed(2) %>%
+                </span>
+              </td>
+              <td class="text-end">
+                <span class="tabular-nums" style="font-size:var(--text-xs);color:<%= dailyColor %>;">
+                  <%= dailyUp ? '+' : '' %><%= (h.changePercent || 0).toFixed(2) %>%
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn btn-icon btn-sm btn-ghost"
+                  hx-delete="/api/portfolio/remove/<%= h._id %>"
+                  hx-target="#portfolio-holdings"
+                  hx-swap="innerHTML"
+                  hx-confirm="Remove <%= h.symbol %> from portfolio?"
+                  hx-indicator="closest tr"
+                  title="Remove"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

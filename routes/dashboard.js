@@ -42,7 +42,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     console.error('Dashboard error:', err);
-    req.flash('error_msg', 'Hitilafu katika kupakia dashboard');
+    req.flash('error_msg', 'Error loading dashboard');
     res.redirect('/');
   }
 });

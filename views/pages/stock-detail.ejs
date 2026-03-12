@@ -1,0 +1,131 @@
+<%
+  const sd = typeof stock !== 'undefined' ? stock : {};
+  const sdHistory = typeof history !== 'undefined' ? history : [];
+  const sdCompany = typeof companyInfo !== 'undefined' ? companyInfo : {};
+  const sdWatched = typeof isWatched !== 'undefined' ? isWatched : false;
+  const ch = sd.changePercent || 0;
+  const isUp = ch > 0;
+  const prefix = isUp ? '+' : '';
+  const gainColor = isUp ? 'var(--green)' : ch < 0 ? 'var(--red)' : 'var(--text-muted)';
+%>
+<section class="page-section">
+  <div class="container-hisa">
+
+    <!-- Breadcrumb -->
+    <div class="mb-4" style="font-size:var(--text-sm);">
+      <a href="/stocks" class="text-secondary" style="text-decoration:none;">Stocks</a>
+      <span class="text-muted mx-2">/</span>
+      <span class="text-primary fw-600"><%= sd.symbol %></span>
+    </div>
+
+    <!-- Stock Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <div class="d-flex align-items-center gap-3 mb-1">
+          <h1 style="font-size:var(--text-3xl);font-weight:800;margin:0;"><%= sd.symbol %></h1>
+          <span class="chip"><%= sdCompany.sector || 'N/A' %></span>
+        </div>
+        <p class="text-secondary mb-0" style="font-size:var(--text-sm);"><%= sdCompany.name || sd.companyName || sd.symbol %></p>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <!-- Price -->
+        <div class="text-md-end">
+          <div class="tabular-nums fw-800" style="font-size:var(--text-3xl);line-height:1;">
+            <%= sd.price ? sd.price.toLocaleString('en-TZ') : '0' %>
+          </div>
+          <div class="d-flex align-items-center gap-2 mt-1" style="justify-content:flex-end;">
+            <span class="text-muted" style="font-size:var(--text-xs);">TZS</span>
+            <span class="tabular-nums fw-600" style="font-size:var(--text-sm);color:<%= gainColor %>;">
+              <%= prefix %><%= sd.change ? sd.change.toFixed(2) : '0.00' %>
+            </span>
+            <span class="badge" style="font-size:var(--text-xs);padding:3px 8px;border-radius:var(--border-radius-full);background:<%= isUp ? 'rgba(16,185,129,0.15)' : ch < 0 ? 'rgba(239,68,68,0.15)' : 'rgba(156,163,175,0.1)' %>;color:<%= gainColor %>;">
+              <%= prefix %><%= ch.toFixed(2) %>%
+            </span>
+          </div>
+        </div>
+
+        <!-- Watchlist Toggle -->
+        <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
+          <button
+            id="watchlist-btn"
+            class="btn <%= sdWatched ? 'btn-primary' : 'btn-ghost' %> btn-sm"
+            hx-post="/api/watchlist/toggle/<%= sd.symbol %>"
+            hx-swap="none"
+            hx-indicator="#watchlist-btn"
+            hx-on::after-request="if(event.detail.successful){const b=document.getElementById('watchlist-btn');b.classList.toggle('btn-primary');b.classList.toggle('btn-ghost');const t=b.querySelector('span');t.textContent=t.textContent.trim()==='Watching'?'Watch':'Watching';}"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="<%= sdWatched ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span><%= sdWatched ? 'Watching' : 'Watch' %></span>
+          </button>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Chart -->
+      <div class="col-lg-8">
+        <div class="card" style="padding:var(--space-5);">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h6 class="mb-0" style="font-weight:700;font-size:var(--text-sm);">Price History</h6>
+            <div class="d-flex gap-2">
+              <button class="period-btn chip chip-interactive" data-period="7">7D</button>
+              <button class="period-btn chip chip-interactive chip-active active" data-period="30">30D</button>
+              <button class="period-btn chip chip-interactive" data-period="90">90D</button>
+            </div>
+          </div>
+          <div id="stock-chart" data-symbol="<%= sd.symbol %>" style="height:300px;position:relative;">
+            <% if (sdHistory.length === 0) { %>
+              <div class="empty-state" style="padding:var(--space-10) 0;">
+                <p class="text-muted" style="font-size:var(--text-sm);">No historical data available.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Sidebar -->
+      <div class="col-lg-4">
+        <div class="card" style="padding:var(--space-5);">
+          <h6 class="mb-3" style="font-weight:700;font-size:var(--text-sm);">Today's Stats</h6>
+
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border-default);">
+            <span class="text-secondary" style="font-size:var(--text-sm);">Open</span>
+            <span class="tabular-nums fw-600" style="font-size:var(--text-sm);"><%= sd.open ? sd.open.toLocaleString('en-TZ') : '-' %></span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border-default);">
+            <span class="text-secondary" style="font-size:var(--text-sm);">High</span>
+            <span class="tabular-nums fw-600 text-green" style="font-size:var(--text-sm);"><%= sd.high ? sd.high.toLocaleString('en-TZ') : '-' %></span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border-default);">
+            <span class="text-secondary" style="font-size:var(--text-sm);">Low</span>
+            <span class="tabular-nums fw-600 text-red" style="font-size:var(--text-sm);"><%= sd.low ? sd.low.toLocaleString('en-TZ') : '-' %></span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border-default);">
+            <span class="text-secondary" style="font-size:var(--text-sm);">Prev Close</span>
+            <span class="tabular-nums fw-600" style="font-size:var(--text-sm);"><%= sd.previousClose ? sd.previousClose.toLocaleString('en-TZ') : '-' %></span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border-default);">
+            <span class="text-secondary" style="font-size:var(--text-sm);">Volume</span>
+            <span class="tabular-nums fw-600" style="font-size:var(--text-sm);"><%= sd.volume ? sd.volume.toLocaleString('en-TZ') : '-' %></span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border-default);">
+            <span class="text-secondary" style="font-size:var(--text-sm);">Deals</span>
+            <span class="tabular-nums fw-600" style="font-size:var(--text-sm);"><%= sd.deals ? sd.deals.toLocaleString('en-TZ') : '-' %></span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-3">
+            <span class="text-secondary" style="font-size:var(--text-sm);">Turnover</span>
+            <span class="tabular-nums fw-600" style="font-size:var(--text-sm);"><%= sd.turnover ? sd.turnover.toLocaleString('en-TZ') : '-' %> <span class="text-muted" style="font-size:10px;">TZS</span></span>
+          </div>
+        </div>
+
+        <% if (sd.lastTradeDate) { %>
+          <p class="text-muted mt-3 text-center" style="font-size:var(--text-xs);">
+            Last trade: <%= new Date(sd.lastTradeDate).toLocaleDateString('en-TZ', { year:'numeric', month:'short', day:'numeric' }) %>
+          </p>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+</section>

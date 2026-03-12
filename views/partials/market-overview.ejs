@@ -11,79 +11,73 @@
   <!-- Stats Row -->
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-      <div class="glass" style="border-radius: var(--border-radius); padding: var(--space-4); text-align: center; border: 1px solid var(--border-default);">
-        <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Hisa Zote</p>
-        <span class="tabular-nums fw-700" style="font-size: var(--text-2xl); color: var(--gold);"><%= moTotalStocks %></span>
+      <div class="glass" style="border-radius:var(--border-radius);padding:var(--space-4);text-align:center;border:1px solid var(--border-default);">
+        <p class="text-secondary mb-1" style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.06em;">Listed Stocks</p>
+        <span class="tabular-nums fw-700" style="font-size:var(--text-2xl);color:var(--gold);"><%= moTotalStocks %></span>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="glass" style="border-radius: var(--border-radius); padding: var(--space-4); text-align: center; border: 1px solid var(--border-default);">
-        <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Volume</p>
-        <span class="tabular-nums fw-700" style="font-size: var(--text-2xl); color: var(--text-primary);"><%= moTotalVolume.toLocaleString('en-TZ') %></span>
+      <div class="glass" style="border-radius:var(--border-radius);padding:var(--space-4);text-align:center;border:1px solid var(--border-default);">
+        <p class="text-secondary mb-1" style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.06em;">Volume</p>
+        <span class="tabular-nums fw-700" style="font-size:var(--text-2xl);color:var(--text-primary);"><%= moTotalVolume.toLocaleString('en-TZ') %></span>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="glass" style="border-radius: var(--border-radius); padding: var(--space-4); text-align: center; border: 1px solid var(--border-default);">
-        <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Turnover</p>
-        <span class="tabular-nums fw-700" style="font-size: var(--text-xl); color: var(--text-primary);"><%= moTotalTurnover.toLocaleString('en-TZ') %></span>
-        <span class="text-muted" style="font-size: var(--text-xs);"> TZS</span>
+      <div class="glass" style="border-radius:var(--border-radius);padding:var(--space-4);text-align:center;border:1px solid var(--border-default);">
+        <p class="text-secondary mb-1" style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.06em;">Turnover</p>
+        <span class="tabular-nums fw-700" style="font-size:var(--text-xl);color:var(--text-primary);"><%= moTotalTurnover.toLocaleString('en-TZ') %></span>
+        <span class="text-muted" style="font-size:var(--text-xs);"> TZS</span>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="glass" style="border-radius: var(--border-radius); padding: var(--space-4); text-align: center; border: 1px solid var(--border-default);">
-        <p class="text-secondary mb-1" style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em;">Miamala</p>
-        <span class="tabular-nums fw-700" style="font-size: var(--text-2xl); color: var(--text-primary);"><%= moTotalDeals.toLocaleString('en-TZ') %></span>
+      <div class="glass" style="border-radius:var(--border-radius);padding:var(--space-4);text-align:center;border:1px solid var(--border-default);">
+        <p class="text-secondary mb-1" style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.06em;">Deals</p>
+        <span class="tabular-nums fw-700" style="font-size:var(--text-2xl);color:var(--text-primary);"><%= moTotalDeals.toLocaleString('en-TZ') %></span>
       </div>
     </div>
   </div>
 
   <!-- Gainers & Losers -->
   <div class="row g-3">
-    <!-- Top Gainers -->
     <div class="col-md-6">
-      <div class="glass" style="border-radius: var(--border-radius); padding: var(--space-5); border: 1px solid var(--border-default);">
-        <h6 class="d-flex align-items-center gap-2 mb-3" style="font-size: var(--text-sm); color: var(--green);">
+      <div class="glass" style="border-radius:var(--border-radius);padding:var(--space-5);border:1px solid var(--border-default);">
+        <h6 class="d-flex align-items-center gap-2 mb-3" style="font-size:var(--text-sm);color:var(--green);font-weight:600;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 17"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-          Zilizopanda
+          Top Gainers
         </h6>
         <% if (moGainers.length === 0) { %>
-          <p class="text-muted" style="font-size: var(--text-sm);">Hakuna hisa zilizopanda leo.</p>
+          <p class="text-muted" style="font-size:var(--text-sm);">No gainers today.</p>
         <% } else { %>
           <% moGainers.forEach(function(g) { %>
-            <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid var(--border-default);">
-              <a href="/stocks/<%= g.symbol %>" class="fw-600" style="font-size: var(--text-sm); color: var(--text-primary); text-decoration: none;">
-                <%= g.symbol %>
-              </a>
+            <a href="/stocks/<%= g.symbol %>" class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--border-default);text-decoration:none;color:var(--text-primary);">
+              <span class="fw-600" style="font-size:var(--text-sm);color:var(--text-primary);"><%= g.symbol %></span>
               <div class="text-end">
-                <span class="tabular-nums fw-600" style="font-size: var(--text-sm); color: var(--text-primary);"><%= g.price ? g.price.toLocaleString('en-TZ') : '0' %></span>
-                <span class="tabular-nums text-green ms-2" style="font-size: var(--text-xs);">+<%= g.changePercent ? g.changePercent.toFixed(2) : '0.00' %>%</span>
+                <span class="tabular-nums fw-600" style="font-size:var(--text-sm);color:var(--text-primary);"><%= g.price ? g.price.toLocaleString('en-TZ') : '0' %></span>
+                <span class="tabular-nums text-green ms-2" style="font-size:var(--text-xs);">+<%= g.changePercent ? g.changePercent.toFixed(2) : '0.00' %>%</span>
               </div>
-            </div>
+            </a>
           <% }); %>
         <% } %>
       </div>
     </div>
 
-    <!-- Top Losers -->
     <div class="col-md-6">
-      <div class="glass" style="border-radius: var(--border-radius); padding: var(--space-5); border: 1px solid var(--border-default);">
-        <h6 class="d-flex align-items-center gap-2 mb-3" style="font-size: var(--text-sm); color: var(--red);">
+      <div class="glass" style="border-radius:var(--border-radius);padding:var(--space-5);border:1px solid var(--border-default);">
+        <h6 class="d-flex align-items-center gap-2 mb-3" style="font-size:var(--text-sm);color:var(--red);font-weight:600;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 7"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
-          Zilizoshuka
+          Top Losers
         </h6>
         <% if (moLosers.length === 0) { %>
-          <p class="text-muted" style="font-size: var(--text-sm);">Hakuna hisa zilizoshuka leo.</p>
+          <p class="text-muted" style="font-size:var(--text-sm);">No losers today.</p>
         <% } else { %>
           <% moLosers.forEach(function(l) { %>
-            <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid var(--border-default);">
-              <a href="/stocks/<%= l.symbol %>" class="fw-600" style="font-size: var(--text-sm); color: var(--text-primary); text-decoration: none;">
-                <%= l.symbol %>
-              </a>
+            <a href="/stocks/<%= l.symbol %>" class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--border-default);text-decoration:none;color:var(--text-primary);">
+              <span class="fw-600" style="font-size:var(--text-sm);color:var(--text-primary);"><%= l.symbol %></span>
               <div class="text-end">
-                <span class="tabular-nums fw-600" style="font-size: var(--text-sm); color: var(--text-primary);"><%= l.price ? l.price.toLocaleString('en-TZ') : '0' %></span>
-                <span class="tabular-nums text-red ms-2" style="font-size: var(--text-xs);"><%= l.changePercent ? l.changePercent.toFixed(2) : '0.00' %>%</span>
+                <span class="tabular-nums fw-600" style="font-size:var(--text-sm);color:var(--text-primary);"><%= l.price ? l.price.toLocaleString('en-TZ') : '0' %></span>
+                <span class="tabular-nums text-red ms-2" style="font-size:var(--text-xs);"><%= l.changePercent ? l.changePercent.toFixed(2) : '0.00' %>%</span>
               </div>
-            </div>
+            </a>
           <% }); %>
         <% } %>
       </div>

@@ -27,7 +27,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     console.error('Portfolio error:', err);
-    req.flash('error_msg', 'Hitilafu katika kupakia portfolio');
+    req.flash('error_msg', 'Error loading portfolio');
     res.redirect('/dashboard');
   }
 });

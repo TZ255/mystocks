@@ -19,7 +19,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     console.error('Watchlist error:', err);
-    req.flash('error_msg', 'Hitilafu katika kupakia watchlist');
+    req.flash('error_msg', 'Error loading watchlist');
     res.redirect('/dashboard');
   }
 });

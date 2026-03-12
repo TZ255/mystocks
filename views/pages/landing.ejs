@@ -1,7 +1,4 @@
 <%
-  const ldStocks = typeof stocks !== 'undefined' ? stocks : [];
-  const ldGainers = typeof gainers !== 'undefined' ? gainers : [];
-  const ldLosers = typeof losers !== 'undefined' ? losers : [];
   const ldTotalStocks = typeof totalStocks !== 'undefined' ? totalStocks : 0;
   const ldTotalVolume = typeof totalVolume !== 'undefined' ? totalVolume : 0;
 %>
@@ -93,6 +90,7 @@
     hx-get="/api/market/ticker"
     hx-trigger="load"
     hx-swap="innerHTML"
+    hx-indicator="#ticker-loader"
     style="display: flex; white-space: nowrap;"
   >
     <!-- Ticker content loaded via HTMX -->
@@ -210,6 +208,7 @@
       hx-get="/api/market/overview"
       hx-trigger="load, every 60s"
       hx-swap="innerHTML"
+      hx-indicator="#overview-loader"
     >
       <!-- Loading placeholder -->
       <div class="row g-3">
@@ -313,6 +312,7 @@
             hx-get="/api/stocks/table?limit=10"
             hx-trigger="load"
             hx-swap="innerHTML"
+            hx-indicator="#stocks-table-loader"
           >
             <!-- Loading placeholders -->
             <% for (let i = 0; i < 5; i++) { %>

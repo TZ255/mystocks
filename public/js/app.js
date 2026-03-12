@@ -10,13 +10,10 @@
   // HTMX Configuration
   // ---------------------------------------------------------------------------
 
-  document.addEventListener('htmx:configRequest', () => {
-    // Default swap strategy is innerHTML; set via meta or here as a fallback.
-  });
-
   if (typeof htmx !== 'undefined') {
     htmx.config.defaultSwapStyle = 'innerHTML';
     htmx.config.historyCacheSize = 0;
+    htmx.config.indicatorClass = 'htmx-request';
   }
 
   // User-friendly HTMX error handling
@@ -42,55 +39,35 @@
   });
 
   // ---------------------------------------------------------------------------
-  // Mobile Navigation Toggle
-  // ---------------------------------------------------------------------------
-
-  function initMobileNav() {
-    const toggle = document.querySelector('.nav-toggle, .hamburger');
-    const navMenu = document.querySelector('.nav-menu, .nav-links');
-
-    if (!toggle || !navMenu) return;
-
-    toggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = navMenu.classList.toggle('open');
-      toggle.classList.toggle('active', isOpen);
-      toggle.setAttribute('aria-expanded', String(isOpen));
-    });
-
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!navMenu.contains(e.target) && !toggle.contains(e.target)) {
-        navMenu.classList.remove('open');
-        toggle.classList.remove('active');
-        toggle.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    // Close menu on Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        navMenu.classList.remove('open');
-        toggle.classList.remove('active');
-        toggle.setAttribute('aria-expanded', 'false');
-      }
-    });
-  }
-
-  // ---------------------------------------------------------------------------
-  // Scroll Handler  --  .nav-scrolled class
+  // Scroll Handler — .nav-scrolled class (landing page only)
   // ---------------------------------------------------------------------------
 
   function initScrollHandler() {
-    const nav = document.querySelector('.main-nav');
+    const nav = document.getElementById('main-nav');
     if (!nav) return;
+
+    // Only apply transparent-to-glass on landing page
+    const isLanding = window.location.pathname === '/';
+    if (!isLanding) return;
+
+    // Remove initial background on landing
+    nav.style.background = 'transparent';
+    nav.style.borderBottom = '1px solid transparent';
 
     let ticking = false;
 
     function onScroll() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          nav.classList.toggle('nav-scrolled', window.scrollY > 50);
+          const scrolled = window.scrollY > 50;
+          nav.classList.toggle('nav-scrolled', scrolled);
+          if (scrolled) {
+            nav.style.background = '';
+            nav.style.borderBottom = '';
+          } else {
+            nav.style.background = 'transparent';
+            nav.style.borderBottom = '1px solid transparent';
+          }
           ticking = false;
         });
         ticking = true;
@@ -98,9 +75,24 @@
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
 
-    // Apply immediately in case the page loaded already scrolled
-    nav.classList.toggle('nav-scrolled', window.scrollY > 50);
+  // ---------------------------------------------------------------------------
+  // Bootstrap Mobile Nav — close on link click
+  // ---------------------------------------------------------------------------
+
+  function initMobileNavClose() {
+    const navCollapse = document.getElementById('navContent');
+    if (!navCollapse) return;
+
+    // Close mobile nav when a link is clicked
+    navCollapse.querySelectorAll('.nav-link:not(.dropdown-toggle)').forEach((link) => {
+      link.addEventListener('click', () => {
+        const bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
+        if (bsCollapse) bsCollapse.hide();
+      });
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -111,7 +103,6 @@
     const target = event.detail.target;
     if (!target) return;
 
-    // Trigger a subtle fade-in on swapped content
     target.classList.add('htmx-swapping-in');
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -119,12 +110,10 @@
       });
     });
 
-    // Re-initialise any flash messages inside the swapped content
     autoDismissFlashMessages(target);
   });
 
-  // Listen for custom toast events dispatched from HTMX response headers
-  // Server can send HX-Trigger: {"showToast": {"message": "...", "type": "success"}}
+  // Listen for custom toast events from HTMX response headers
   document.addEventListener('showToast', (event) => {
     const { message, type } = event.detail || {};
     if (message) {
@@ -157,7 +146,6 @@
 
     container.appendChild(toast);
 
-    // Trigger reflow so the transition runs
     toast.offsetHeight; // eslint-disable-line no-unused-expressions
 
     requestAnimationFrame(() => {
@@ -177,13 +165,11 @@
     toast.classList.add('toast-hiding');
     toast.addEventListener('transitionend', () => toast.remove(), { once: true });
 
-    // Fallback removal if transitionend never fires
     setTimeout(() => {
       if (toast.parentNode) toast.remove();
     }, 500);
   }
 
-  // Expose globally so other modules can trigger toasts
   window.showToast = showToast;
 
   // ---------------------------------------------------------------------------
@@ -191,19 +177,18 @@
   // ---------------------------------------------------------------------------
 
   function autoDismissFlashMessages(root = document) {
-    const flashes = root.querySelectorAll('.flash-message, .alert');
+    const flashes = root.querySelectorAll('.flash-message, .flash-alert');
     flashes.forEach((flash) => {
-      // Skip messages already scheduled
       if (flash.dataset.autoDismiss === 'true') return;
       flash.dataset.autoDismiss = 'true';
 
       setTimeout(() => {
-        flash.classList.add('flash-dismiss');
-        flash.addEventListener('transitionend', () => flash.remove(), { once: true });
-        // Fallback
+        flash.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        flash.style.opacity = '0';
+        flash.style.transform = 'translateY(-10px)';
         setTimeout(() => {
           if (flash.parentNode) flash.remove();
-        }, 500);
+        }, 400);
       }, 5000);
     });
   }
@@ -212,11 +197,6 @@
   // Currency Formatting Utility
   // ---------------------------------------------------------------------------
 
-  /**
-   * Format a number as Tanzanian Shillings.
-   * @param {number|string} num - The value to format.
-   * @returns {string} e.g. "TZS 1,234,567"
-   */
   function formatTZS(num) {
     const n = Number(num);
     if (Number.isNaN(n)) return 'TZS 0';
@@ -228,7 +208,6 @@
     return `TZS ${formatted}`;
   }
 
-  // Expose globally
   window.formatTZS = formatTZS;
 
   // ---------------------------------------------------------------------------
@@ -236,8 +215,8 @@
   // ---------------------------------------------------------------------------
 
   function init() {
-    initMobileNav();
     initScrollHandler();
+    initMobileNavClose();
     autoDismissFlashMessages();
   }
 
