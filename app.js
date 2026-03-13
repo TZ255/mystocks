@@ -53,24 +53,6 @@ app.use(
   })
 );
 
-app.set('trust proxy', true)
-
-// Rate limiting
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(globalLimiter);
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 // Body parsing
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
