@@ -5,6 +5,7 @@ const transactionSchema = new mongoose.Schema({
   shares: { type: Number, required: true, min: 1 },
   price: { type: Number, required: true, min: 0 },
   date: { type: Date, required: true },
+  fees: { type: Number, default: 0, min: 0 },
   notes: { type: String, default: '' },
 }, { _id: true, timestamps: true });
 

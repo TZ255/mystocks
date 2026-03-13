@@ -1,6 +1,7 @@
 export const calculatePortfolioSummary = (holdings, stockMap) => {
   let totalInvested = 0;
   let totalCurrentValue = 0;
+  let totalFeesPaid = 0;
   const enrichedHoldings = [];
   const sectorAllocation = {};
 
@@ -9,11 +10,17 @@ export const calculatePortfolioSummary = (holdings, stockMap) => {
     const currentPrice = stock?.price || 0;
     const invested = holding.shares * holding.avgBuyPrice;
     const currentValue = holding.shares * currentPrice;
-    const gain = currentValue - invested;
-    const gainPercent = invested > 0 ? ((gain / invested) * 100) : 0;
+
+    // Sum all transaction fees for this holding
+    const totalFees = (holding.transactions || []).reduce((sum, tx) => sum + (tx.fees || 0), 0);
+
+    const gain = currentValue - invested - totalFees;
+    const totalCost = invested + totalFees;
+    const gainPercent = totalCost > 0 ? ((gain / totalCost) * 100) : 0;
 
     totalInvested += invested;
     totalCurrentValue += currentValue;
+    totalFeesPaid += totalFees;
 
     // Sector allocation
     const sector = stock?.sector || 'Other';
@@ -24,6 +31,7 @@ export const calculatePortfolioSummary = (holdings, stockMap) => {
       currentPrice,
       invested,
       currentValue,
+      totalFees,
       gain,
       gainPercent: parseFloat(gainPercent.toFixed(2)),
       change: stock?.change || 0,
@@ -33,8 +41,9 @@ export const calculatePortfolioSummary = (holdings, stockMap) => {
     });
   }
 
-  const totalGain = totalCurrentValue - totalInvested;
-  const totalGainPercent = totalInvested > 0 ? ((totalGain / totalInvested) * 100) : 0;
+  const totalGain = totalCurrentValue - totalInvested - totalFeesPaid;
+  const totalCostBasis = totalInvested + totalFeesPaid;
+  const totalGainPercent = totalCostBasis > 0 ? ((totalGain / totalCostBasis) * 100) : 0;
 
   // Convert sector allocation to percentages
   const sectorData = Object.entries(sectorAllocation).map(([sector, value]) => ({
@@ -52,6 +61,7 @@ export const calculatePortfolioSummary = (holdings, stockMap) => {
     totalCurrentValue,
     totalGain,
     totalGainPercent: parseFloat(totalGainPercent.toFixed(2)),
+    totalFees: totalFeesPaid,
     holdingCount: holdings.length,
     sectorData,
   };

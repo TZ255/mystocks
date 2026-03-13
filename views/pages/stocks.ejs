@@ -16,17 +16,10 @@
         <input
           type="text"
           class="search-input"
+          id="stocks-search-input"
           placeholder="Search stocks..."
-          name="q"
-          hx-get="/api/search"
-          hx-trigger="keyup changed delay:250ms"
-          hx-target="#search-results"
-          hx-swap="innerHTML"
-          hx-indicator="#search-spinner"
           autocomplete="off"
         >
-        <span class="htmx-indicator" id="search-spinner" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);"><span class="spinner spinner-sm"></span></span>
-        <div id="search-results" class="search-results-panel"></div>
       </div>
     </div>
 
@@ -149,20 +142,24 @@
 
 <script>
   (function() {
-    const input = document.querySelector('.search-input');
-    const results = document.getElementById('search-results');
-    if (!input || !results) return;
+    const input = document.getElementById('stocks-search-input');
+    if (!input) return;
+
+    const mobileRows = document.querySelectorAll('.mobile-stock-row');
+    const desktopRows = document.querySelectorAll('.d-none.d-md-block tbody tr');
 
     input.addEventListener('input', function() {
-      results.style.display = this.value.trim() ? 'block' : 'none';
-    });
+      const q = this.value.trim().toLowerCase();
 
-    input.addEventListener('blur', function() {
-      setTimeout(function() { results.style.display = 'none'; }, 200);
-    });
+      mobileRows.forEach(function(row) {
+        const text = row.textContent.toLowerCase();
+        row.style.display = (!q || text.includes(q)) ? '' : 'none';
+      });
 
-    input.addEventListener('focus', function() {
-      if (this.value.trim()) results.style.display = 'block';
+      desktopRows.forEach(function(row) {
+        const text = row.textContent.toLowerCase();
+        row.style.display = (!q || text.includes(q)) ? '' : 'none';
+      });
     });
   })();
 </script>

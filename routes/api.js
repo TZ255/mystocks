@@ -226,7 +226,7 @@ router.get('/watchlist/items', ensureAuthenticated, async (req, res) => {
 // ── Portfolio: Buy / Add ──
 router.post('/portfolio/add', ensureAuthenticated, verifyHtmx, async (req, res) => {
   try {
-    const { symbol, shares, avgBuyPrice, purchaseDate, notes } = req.body;
+    const { symbol, shares, avgBuyPrice, purchaseDate, notes, fees } = req.body;
 
     if (!symbol || !shares || !avgBuyPrice) {
       return res.status(400).render('fragments/toast', {
@@ -238,6 +238,7 @@ router.post('/portfolio/add', ensureAuthenticated, verifyHtmx, async (req, res) 
 
     const shareCount = parseFloat(shares);
     const buyPrice = parseFloat(avgBuyPrice);
+    const txFees = parseFloat(fees) || 0;
     const date = purchaseDate ? new Date(purchaseDate) : new Date();
 
     if (!Number.isFinite(shareCount) || shareCount <= 0 || !Number.isFinite(buyPrice) || buyPrice <= 0) {
@@ -267,12 +268,12 @@ router.post('/portfolio/add', ensureAuthenticated, verifyHtmx, async (req, res) 
         existing.purchaseDate = date;
       }
 
-      existing.notes = notes || existing.notes || '';
       existing.transactions.push({
         type: 'buy',
         shares: shareCount,
         price: buyPrice,
         date,
+        fees: txFees,
         notes: notes || '',
       });
       await existing.save();
@@ -283,12 +284,12 @@ router.post('/portfolio/add', ensureAuthenticated, verifyHtmx, async (req, res) 
         shares: shareCount,
         avgBuyPrice: buyPrice,
         purchaseDate: date,
-        notes: notes || '',
         transactions: [{
           type: 'buy',
           shares: shareCount,
           price: buyPrice,
           date,
+          fees: txFees,
           notes: notes || '',
         }],
       });
@@ -384,6 +385,66 @@ router.delete('/portfolio/remove/:id', ensureAuthenticated, verifyHtmx, async (r
     res.status(500).render('fragments/toast', {
       layout: false,
       message: 'Error removing holding',
+      type: 'error',
+    });
+  }
+});
+
+// ── Portfolio: Remove Transaction ──
+router.delete('/portfolio/transaction/:symbol/:txId', ensureAuthenticated, verifyHtmx, async (req, res) => {
+  try {
+    const { symbol, txId } = req.params;
+    const holding = await Portfolio.findOne({ user: req.user._id, symbol: symbol.toUpperCase() });
+
+    if (!holding) {
+      return res.status(404).render('fragments/toast', {
+        layout: false,
+        message: 'Holding not found',
+        type: 'error',
+      });
+    }
+
+    const tx = holding.transactions.id(txId);
+    if (!tx) {
+      return res.status(404).render('fragments/toast', {
+        layout: false,
+        message: 'Transaction not found',
+        type: 'error',
+      });
+    }
+
+    // Reverse the transaction effect on shares and avgBuyPrice
+    if (tx.type === 'buy') {
+      holding.shares = Math.max(0, holding.shares - tx.shares);
+
+      // Recalculate avg buy price from remaining buy transactions
+      const remainingBuys = holding.transactions.filter(
+        (t) => t.type === 'buy' && t._id.toString() !== txId
+      );
+      if (remainingBuys.length > 0 && holding.shares > 0) {
+        let totalShares = 0;
+        let totalCost = 0;
+        for (const b of remainingBuys) {
+          totalShares += b.shares;
+          totalCost += b.shares * b.price;
+        }
+        holding.avgBuyPrice = totalShares > 0 ? parseFloat((totalCost / totalShares).toFixed(2)) : 0;
+      } else if (holding.shares === 0) {
+        holding.avgBuyPrice = 0;
+      }
+    } else if (tx.type === 'sell') {
+      holding.shares += tx.shares;
+    }
+
+    holding.transactions.pull(txId);
+    await holding.save();
+
+    await renderPortfolioContent(req, res);
+  } catch (err) {
+    console.error('Transaction delete error:', err);
+    res.status(500).render('fragments/toast', {
+      layout: false,
+      message: 'Error deleting transaction',
       type: 'error',
     });
   }

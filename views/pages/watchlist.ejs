@@ -26,19 +26,54 @@
         <input
           type="text"
           class="search-input"
+          id="watchlist-search-input"
           placeholder="Search symbol or company..."
-          name="q"
-          hx-get="/api/search"
-          hx-trigger="keyup changed delay:250ms"
-          hx-target="#watchlist-search-results"
-          hx-swap="innerHTML"
-          hx-indicator="#watchlist-search-indicator"
           autocomplete="off"
         >
-        <span class="htmx-indicator" id="watchlist-search-indicator" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);"><span class="spinner spinner-sm"></span></span>
       </div>
       <div id="watchlist-search-results" class="mt-3 watchlist-search-results"></div>
     </div>
+
+    <script>
+      (function() {
+        const companies = <%- JSON.stringify(typeof dseCompanies !== 'undefined' ? dseCompanies : {}) %>;
+        const input = document.getElementById('watchlist-search-input');
+        const resultsDiv = document.getElementById('watchlist-search-results');
+        if (!input || !resultsDiv) return;
+
+        input.addEventListener('input', function() {
+          const q = this.value.trim().toLowerCase();
+          if (!q) { resultsDiv.innerHTML = ''; return; }
+
+          const matches = Object.entries(companies).filter(function(entry) {
+            return entry[0].toLowerCase().includes(q) || entry[1].name.toLowerCase().includes(q);
+          }).slice(0, 10);
+
+          if (matches.length === 0) {
+            resultsDiv.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-4);font-size:var(--text-sm);">No results found.</div>';
+            return;
+          }
+
+          resultsDiv.innerHTML = matches.map(function(entry) {
+            var sym = entry[0], info = entry[1];
+            return '<div class="search-result-row">' +
+              '<a href="/stocks/' + sym + '" class="search-result-link">' +
+                '<div><span class="fw-700" style="font-size:var(--text-sm);color:var(--text-primary);">' + sym + '</span>' +
+                '<span class="text-secondary ms-2" style="font-size:var(--text-xs);">' + info.name + '</span></div>' +
+                '<div class="text-end"><span class="chip" style="font-size:10px;">' + info.sector + '</span></div>' +
+              '</a>' +
+              '<button class="btn btn-sm btn-ghost watch-toggle-btn" data-symbol="' + sym + '" data-watched="false"' +
+                ' hx-post="/api/watchlist/toggle/' + sym + '" hx-swap="none" hx-indicator="this" type="button">' +
+                '<span class="htmx-indicator"><span class="spinner spinner-sm"></span></span>' +
+                '<span class="watch-toggle-label">Watch</span>' +
+              '</button>' +
+            '</div>';
+          }).join('');
+
+          htmx.process(resultsDiv);
+        });
+      })();
+    </script>
 
     <!-- Watchlist Content -->
     <div class="card loading-shell" style="padding:var(--space-5);">

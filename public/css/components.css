@@ -1601,7 +1601,23 @@
 }
 
 .watch-toggle-btn.htmx-request .watch-toggle-label {
-  opacity: 0.7;
+  display: none;
+}
+
+.watch-toggle-btn.htmx-request .htmx-indicator {
+  margin-right: 0;
+}
+
+.tx-delete-btn .htmx-indicator {
+  display: none;
+}
+
+.tx-delete-btn.htmx-request .htmx-indicator {
+  display: inline-flex;
+}
+
+.tx-delete-btn.htmx-request .tx-delete-icon {
+  display: none;
 }
 
 .watchlist-grid {

@@ -27,18 +27,20 @@
             <p class="mb-0 tabular-nums" style="font-size:var(--text-xs);color:<%= changeColor %>;"><%= prefix %><%= ch.toFixed(2) %>%</p>
           </div>
         </a>
-        <button
-          class="btn btn-ghost btn-sm w-100 watch-toggle-btn"
-          data-symbol="<%= s.symbol %>"
-          data-watched="true"
-          hx-post="/api/watchlist/toggle/<%= s.symbol %>"
-          hx-swap="none"
-          hx-indicator="this"
-          title="Remove from watchlist"
-        >
-          <span class="htmx-indicator"><span class="spinner spinner-sm"></span></span>
-          <span class="watch-toggle-label">Watching</span>
-        </button>
+        <div class="d-flex justify-content-end" style="padding-top:var(--space-2);border-top:1px solid var(--border-default);margin-top:var(--space-3);">
+          <button
+            class="btn btn-icon btn-sm btn-ghost watch-toggle-btn"
+            data-symbol="<%= s.symbol %>"
+            data-watched="true"
+            hx-post="/api/watchlist/toggle/<%= s.symbol %>"
+            hx-swap="none"
+            hx-indicator="this"
+            title="Remove from watchlist"
+          >
+            <span class="htmx-indicator"><span class="spinner spinner-sm"></span></span>
+            <span class="watch-toggle-label"><i class="fas fa-eye" style="color:var(--accent);font-size:var(--text-base);"></i></span>
+          </button>
+        </div>
       </div>
     <% }); %>
   </div>

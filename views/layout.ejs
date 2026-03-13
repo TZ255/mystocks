@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="HisaZangu — Track your Dar es Salaam Stock Exchange (DSE) investments. Portfolio, Watchlist, and Price Alerts — all in one place.">
-  <meta name="keywords" content="DSE, Dar es Salaam Stock Exchange, Tanzania, stock market, portfolio tracker, HisaZangu">
+  <meta name="description"
+    content="HisaZangu — Track your Dar es Salaam Stock Exchange (DSE) investments. Portfolio, Watchlist, and Price Alerts — all in one place.">
+  <meta name="keywords"
+    content="DSE, Dar es Salaam Stock Exchange, Tanzania, stock market, portfolio tracker, HisaZangu">
   <meta name="author" content="HisaZangu">
   <meta name="theme-color" content="#0B0F1A">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,17 +25,27 @@
   <!-- Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" rel="stylesheet">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="HisaZangu" />
+  <link rel="manifest" href="/favicon/site.webmanifest" />
+
   <!-- Custom CSS -->
   <link rel="stylesheet" href="/css/theme.css">
   <link rel="stylesheet" href="/css/components.css">
   <% if (typeof currentPath !== 'undefined' && currentPath === '/') { %>
-    <link rel="stylesheet" href="/css/landing.css">
+  <link rel="stylesheet" href="/css/landing.css">
   <% } %>
   <% if (typeof currentPath !== 'undefined' && currentPath !== '/') { %>
-    <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
   <% } %>
 </head>
-<body class="<%= (typeof isAuthenticated !== 'undefined' && isAuthenticated && typeof currentPath !== 'undefined' && currentPath !== '/') ? 'has-bottom-tabs' : '' %>">
+
+<body
+  class="<%= (typeof isAuthenticated !== 'undefined' && isAuthenticated && typeof currentPath !== 'undefined' && currentPath !== '/') ? 'has-bottom-tabs' : '' %>">
   <div id="htmx-progress" aria-hidden="true"></div>
 
   <%- include('partials/nav') %>
@@ -46,47 +59,68 @@
   </main>
 
   <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated && typeof currentPath !== 'undefined' && currentPath !== '/') { %>
-    <!-- Mobile Bottom Tab Bar -->
-    <nav
-      class="bottom-tab-bar"
-      aria-label="Mobile navigation"
-      hx-boost="true"
-      hx-target="#app-content"
-      hx-select="#app-content"
-      hx-swap="innerHTML transition:true"
-      hx-push-url="true"
-      hx-indicator="#bottom-nav-indicator"
-    >
-      <div class="bottom-tab-bar-inner">
-        <a href="/dashboard" data-route="/dashboard" data-match="exact" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/dashboard' ? 'active' : '' %>">
-          <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>Home</span>
-        </a>
-        <a href="/stocks" data-route="/stocks" data-match="prefix" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath.startsWith('/stocks') ? 'active' : '' %>">
-          <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-          <span>Stocks</span>
-        </a>
-        <a href="/portfolio" data-route="/portfolio" data-match="exact" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/portfolio' ? 'active' : '' %>">
-          <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-          <span>Portfolio</span>
-        </a>
-        <a href="/watchlist" data-route="/watchlist" data-match="exact" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/watchlist' ? 'active' : '' %>">
-          <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          <span>Watch</span>
-        </a>
-        <a href="/alerts" data-route="/alerts" data-match="exact" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/alerts' ? 'active' : '' %>">
-          <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span>Alerts</span>
-        </a>
-      </div>
-      <div class="bottom-nav-indicator htmx-indicator" id="bottom-nav-indicator">
-        <span class="spinner spinner-sm"></span>
-      </div>
-    </nav>
+  <!-- Mobile Bottom Tab Bar -->
+  <nav class="bottom-tab-bar" aria-label="Mobile navigation" hx-boost="true" hx-target="#app-content"
+    hx-select="#app-content" hx-swap="innerHTML transition:true" hx-push-url="true"
+    hx-indicator="#bottom-nav-indicator">
+    <div class="bottom-tab-bar-inner">
+      <a href="/dashboard" data-route="/dashboard" data-match="exact"
+        class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/dashboard' ? 'active' : '' %>">
+        <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="/stocks" data-route="/stocks" data-match="prefix"
+        class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath.startsWith('/stocks') ? 'active' : '' %>">
+        <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+          <polyline points="16 7 22 7 22 13"></polyline>
+        </svg>
+        <span>Stocks</span>
+      </a>
+      <a href="/portfolio" data-route="/portfolio" data-match="exact"
+        class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/portfolio' ? 'active' : '' %>">
+        <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+          </path>
+        </svg>
+        <span>Portfolio</span>
+      </a>
+      <a href="/watchlist" data-route="/watchlist" data-match="exact"
+        class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/watchlist' ? 'active' : '' %>">
+        <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        <span>Watch</span>
+      </a>
+      <a href="/alerts" data-route="/alerts" data-match="exact"
+        class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/alerts' ? 'active' : '' %>">
+        <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span>Alerts</span>
+      </a>
+    </div>
+    <div class="bottom-nav-indicator htmx-indicator" id="bottom-nav-indicator">
+      <span class="spinner spinner-sm"></span>
+    </div>
+  </nav>
   <% } %>
 
   <% if (typeof currentPath === 'undefined' || currentPath === '/' || currentPath === '/privacy' || currentPath === '/terms' || (typeof isAuthenticated !== 'undefined' && !isAuthenticated)) { %>
-    <%- include('partials/footer') %>
+  <%- include('partials/footer') %>
   <% } %>
 
   <!-- Bootstrap JS Bundle -->
@@ -96,20 +130,21 @@
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
   <% if (typeof currentPath !== 'undefined' && currentPath !== '/') { %>
-    <!-- Chart.js (only on app pages) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js (only on app pages) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <% } %>
 
   <!-- Custom JS -->
   <script src="/js/app.js"></script>
 
   <% if (typeof currentPath !== 'undefined' && currentPath === '/') { %>
-    <script src="/js/landing.js"></script>
+  <script src="/js/landing.js"></script>
   <% } %>
 
   <% if (typeof currentPath !== 'undefined' && currentPath !== '/') { %>
-    <script src="/js/dashboard.js"></script>
+  <script src="/js/dashboard.js"></script>
   <% } %>
 
 </body>
+
 </html>

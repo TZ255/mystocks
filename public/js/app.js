@@ -123,7 +123,15 @@
 
     const label = button.querySelector('.watch-toggle-label');
     if (label) {
-      label.textContent = isWatched ? 'Watching' : 'Watch';
+      // Check if this is an icon-only button (watchlist items use FA eye icon)
+      const faIcon = label.querySelector('.fa-eye, .fa-eye-slash');
+      if (faIcon) {
+        label.innerHTML = isWatched
+          ? '<i class="fas fa-eye" style="color:var(--accent);font-size:var(--text-base);"></i>'
+          : '<i class="fas fa-eye-slash" style="color:var(--text-muted);font-size:var(--text-base);"></i>';
+      } else {
+        label.textContent = isWatched ? 'Watching' : 'Watch';
+      }
     }
 
     const icon = button.querySelector('svg');

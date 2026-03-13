@@ -87,13 +87,15 @@
               <input type="number" name="avgBuyPrice" class="form-input" placeholder="1,500" min="0" step="0.01" required>
             </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Purchase Date</label>
-            <input type="date" name="purchaseDate" class="form-input" value="<%= today %>" max="<%= today %>">
-          </div>
-          <div class="mb-4">
-            <label class="form-label">Notes (optional)</label>
-            <input type="text" name="notes" class="form-input" placeholder="e.g. Long-term hold">
+          <div class="row g-3 mb-4">
+            <div class="col-6">
+              <label class="form-label">Purchase Date</label>
+              <input type="date" name="purchaseDate" class="form-input" value="<%= today %>" max="<%= today %>">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Fees (TZS)</label>
+              <input type="number" name="fees" class="form-input" placeholder="0" min="0" step="0.01">
+            </div>
           </div>
           <button type="submit" class="btn btn-success w-100">
             <span class="htmx-indicator me-2" id="buy-submit-indicator"><span class="spinner spinner-sm"></span></span>

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import Watchlist from '../models/Watchlist.js';
 import Stock from '../models/Stock.js';
+import dseCompanies from '../config/dseCompanies.js';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
       title: 'Watchlist - HisaZangu',
       watchlistItems,
       stocks,
+      dseCompanies,
     });
   } catch (err) {
     console.error('Watchlist error:', err);
