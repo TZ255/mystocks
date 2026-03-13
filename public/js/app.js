@@ -5,6 +5,7 @@
 
 (function () {
   'use strict';
+  const pendingHtmxXhrs = new Set();
 
   // ---------------------------------------------------------------------------
   // HTMX Configuration
@@ -15,6 +16,25 @@
     htmx.config.historyCacheSize = 0;
     htmx.config.indicatorClass = 'htmx-request';
   }
+
+  function syncBusyState() {
+    document.body.classList.toggle('htmx-busy', pendingHtmxXhrs.size > 0);
+  }
+
+  document.addEventListener('htmx:beforeRequest', (event) => {
+    const xhr = event.detail && event.detail.xhr;
+    if (xhr) pendingHtmxXhrs.add(xhr);
+    syncBusyState();
+  });
+
+  const finalizeRequest = (event) => {
+    const xhr = event.detail && event.detail.xhr;
+    if (xhr) pendingHtmxXhrs.delete(xhr);
+    syncBusyState();
+  };
+
+  document.addEventListener('htmx:afterRequest', finalizeRequest);
+  document.addEventListener('htmx:sendError', finalizeRequest);
 
   // User-friendly HTMX error handling
   document.addEventListener('htmx:responseError', (event) => {
@@ -83,15 +103,72 @@
   // ---------------------------------------------------------------------------
 
   function initMobileNavClose() {
-    const navCollapse = document.getElementById('navContent');
-    if (!navCollapse) return;
+    const navPanel = document.getElementById('mobileNavPanel');
+    if (!navPanel || typeof bootstrap === 'undefined') return;
 
-    // Close mobile nav when a link is clicked
-    navCollapse.querySelectorAll('.nav-link:not(.dropdown-toggle)').forEach((link) => {
+    navPanel.querySelectorAll('a[href]').forEach((link) => {
       link.addEventListener('click', () => {
-        const bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
-        if (bsCollapse) bsCollapse.hide();
+        const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(navPanel);
+        offcanvas.hide();
       });
+    });
+  }
+
+  function setWatchButtonState(button, isWatched) {
+    if (!button) return;
+
+    button.dataset.watched = isWatched ? 'true' : 'false';
+    button.classList.toggle('btn-primary', isWatched);
+    button.classList.toggle('btn-ghost', !isWatched);
+
+    const label = button.querySelector('.watch-toggle-label');
+    if (label) {
+      label.textContent = isWatched ? 'Watching' : 'Watch';
+    }
+
+    const icon = button.querySelector('svg');
+    if (icon) {
+      icon.setAttribute('fill', isWatched ? 'currentColor' : 'none');
+    }
+  }
+
+  function escapeSelector(value) {
+    if (window.CSS && typeof window.CSS.escape === 'function') {
+      return window.CSS.escape(value);
+    }
+    return String(value).replace(/["\\]/g, '\\$&');
+  }
+
+  function updateWatchButtons(symbol, isWatched) {
+    if (!symbol) return;
+    const selector = `.watch-toggle-btn[data-symbol="${escapeSelector(symbol)}"]`;
+    document.querySelectorAll(selector).forEach((button) => {
+      setWatchButtonState(button, isWatched);
+    });
+  }
+
+  function hydrateWatchButtons(root = document) {
+    root.querySelectorAll('.watch-toggle-btn[data-symbol]').forEach((button) => {
+      const watched = button.dataset.watched === 'true';
+      setWatchButtonState(button, watched);
+    });
+  }
+
+  function pathMatches(route, matchType, currentPath) {
+    if (!route) return false;
+    if (matchType === 'prefix') {
+      return currentPath === route || currentPath.startsWith(`${route}/`);
+    }
+    return currentPath === route;
+  }
+
+  function updateRouteActiveStates(pathname = window.location.pathname) {
+    const navLinks = document.querySelectorAll('[data-route][data-match]');
+    navLinks.forEach((link) => {
+      const route = link.getAttribute('data-route');
+      const matchType = link.getAttribute('data-match') || 'exact';
+      const active = pathMatches(route, matchType, pathname);
+      link.classList.toggle('active', active);
     });
   }
 
@@ -111,6 +188,11 @@
     });
 
     autoDismissFlashMessages(target);
+    hydrateWatchButtons(target);
+
+    if (target.id === 'app-content') {
+      requestAnimationFrame(() => updateRouteActiveStates());
+    }
   });
 
   // Listen for custom toast events from HTMX response headers
@@ -118,6 +200,13 @@
     const { message, type } = event.detail || {};
     if (message) {
       showToast(message, type || 'info');
+    }
+  });
+
+  document.addEventListener('watchlistChanged', (event) => {
+    const detail = event.detail || {};
+    if (typeof detail.symbol === 'string' && typeof detail.isWatched === 'boolean') {
+      updateWatchButtons(detail.symbol, detail.isWatched);
     }
   });
 
@@ -218,6 +307,12 @@
     initScrollHandler();
     initMobileNavClose();
     autoDismissFlashMessages();
+    hydrateWatchButtons();
+    updateRouteActiveStates();
+
+    window.addEventListener('popstate', () => {
+      updateRouteActiveStates();
+    });
   }
 
   if (document.readyState === 'loading') {

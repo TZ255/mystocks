@@ -291,6 +291,20 @@
     initAllocationChart();
   }
 
+  document.addEventListener('htmx:afterSwap', (event) => {
+    const target = event.detail.target;
+    if (!target) return;
+
+    if (target.id === 'portfolio-content' || target.querySelector('#allocationCanvas')) {
+      initAllocationChart();
+    }
+
+    if (target.id === 'stock-chart' || target.querySelector('#stock-chart')) {
+      initChart();
+      initPeriodButtons();
+    }
+  });
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

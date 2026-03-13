@@ -48,7 +48,7 @@ app.use(
           'https://cdn.jsdelivr.net',
           'https://fonts.googleapis.com',
         ],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net'],
         imgSrc: ["'self'", 'data:', 'https://lh3.googleusercontent.com'],
         connectSrc: ["'self'"],
       },

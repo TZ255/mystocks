@@ -1,41 +1,45 @@
 <% const wlStocks = typeof stocks !== 'undefined' ? stocks : []; %>
+
 <% if (wlStocks.length === 0) { %>
   <div class="empty-state" style="padding:var(--space-8);">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:var(--space-4);"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
     <p class="empty-state-title">Your watchlist is empty</p>
-    <p class="empty-state-text">Add stocks to your watchlist from the stocks page.</p>
+    <p class="empty-state-text">Use Quick Add above or browse all stocks.</p>
     <a href="/stocks" class="btn btn-primary btn-sm">Browse Stocks</a>
   </div>
 <% } else { %>
-  <% wlStocks.forEach(function(s) { %>
-    <%
-      const ch = s.changePercent || 0;
-      const isUp = ch > 0;
-      const prefix = isUp ? '+' : '';
-      const changeColor = isUp ? 'var(--green)' : ch < 0 ? 'var(--red)' : 'var(--text-muted)';
-    %>
-    <a href="/stocks/<%= s.symbol %>" class="watchlist-row d-flex justify-content-between align-items-center" style="padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border-default);text-decoration:none;color:var(--text-primary);display:flex;">
-      <div class="d-flex align-items-center gap-3">
-        <span class="fw-700" style="font-size:var(--text-sm);color:var(--text-primary);min-width:55px;"><%= s.symbol %></span>
-        <span class="text-secondary d-none d-sm-inline" style="font-size:var(--text-xs);"><%= s.companyName || '' %></span>
-      </div>
-      <div class="d-flex align-items-center gap-3">
-        <span class="tabular-nums fw-600" style="font-size:var(--text-sm);"><%= s.price ? s.price.toLocaleString('en-TZ') : '0' %></span>
-        <span class="tabular-nums" style="font-size:var(--text-xs);color:<%= changeColor %>;">
-          <%= prefix %><%= ch.toFixed(2) %>%
-        </span>
+  <div class="watchlist-grid">
+    <% wlStocks.forEach(function(s) { %>
+      <%
+        const ch = s.changePercent || 0;
+        const isUp = ch > 0;
+        const prefix = isUp ? '+' : '';
+        const changeColor = isUp ? 'var(--green)' : ch < 0 ? 'var(--red)' : 'var(--text-muted)';
+      %>
+      <div class="watchlist-item-card">
+        <a href="/stocks/<%= s.symbol %>" class="watchlist-item-link">
+          <div>
+            <p class="mb-1 fw-700" style="font-size:var(--text-base);color:var(--text-primary);"><%= s.symbol %></p>
+            <p class="mb-0 text-secondary" style="font-size:var(--text-xs);"><%= s.companyName || '' %></p>
+          </div>
+          <div class="text-end">
+            <p class="mb-1 tabular-nums fw-700" style="font-size:var(--text-base);color:var(--text-primary);"><%= s.price ? s.price.toLocaleString('en-TZ') : '0' %></p>
+            <p class="mb-0 tabular-nums" style="font-size:var(--text-xs);color:<%= changeColor %>;"><%= prefix %><%= ch.toFixed(2) %>%</p>
+          </div>
+        </a>
         <button
-          class="btn btn-icon btn-sm btn-ghost"
+          class="btn btn-ghost btn-sm w-100 watch-toggle-btn"
+          data-symbol="<%= s.symbol %>"
+          data-watched="true"
           hx-post="/api/watchlist/toggle/<%= s.symbol %>"
           hx-swap="none"
-          hx-indicator="closest .watchlist-row"
-          hx-on::after-request="if(event.detail.successful) this.closest('.watchlist-row').remove()"
-          title="Remove"
-          onclick="event.preventDefault();event.stopPropagation();"
+          hx-indicator="this"
+          title="Remove from watchlist"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <span class="htmx-indicator"><span class="spinner spinner-sm"></span></span>
+          <span class="watch-toggle-label">Watching</span>
         </button>
       </div>
-    </a>
-  <% }); %>
+    <% }); %>
+  </div>
 <% } %>

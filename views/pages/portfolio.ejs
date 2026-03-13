@@ -3,185 +3,54 @@
   const pfStockMap = typeof stockMap !== 'undefined' ? stockMap : {};
   const pfSummary = typeof portfolioSummary !== 'undefined' ? portfolioSummary : {};
   const pfAllStocks = typeof allStocks !== 'undefined' ? allStocks : [];
+  const pfTransactions = typeof transactions !== 'undefined' ? transactions : [];
   const today = new Date().toISOString().split('T')[0];
 %>
 
 <section class="page-section">
   <div class="container-hisa">
-
-    <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
       <div>
         <h1 class="page-title">My Portfolio</h1>
         <p class="text-secondary mb-0" style="font-size:var(--text-sm);">Manage your DSE stock holdings, buy and sell shares.</p>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-none d-md-flex gap-2">
         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#buyModal">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           Buy Shares
         </button>
-        <% if (pfHoldings.length > 0) { %>
-          <button class="btn btn-outline-gold btn-sm" data-bs-toggle="modal" data-bs-target="#sellModal">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline></svg>
-            Sell Shares
-          </button>
-        <% } %>
-      </div>
-    </div>
-
-    <!-- Portfolio Summary + Charts -->
-    <% if (pfHoldings.length > 0) { %>
-      <div class="row g-4 mb-4">
-        <div class="col-lg-8">
-          <%- include('../partials/portfolio-summary', { portfolioSummary: pfSummary }) %>
-        </div>
-        <div class="col-lg-4">
-          <div class="card h-100" style="padding:var(--space-5);">
-            <h6 class="mb-3" style="font-weight:600;font-size:var(--text-sm);color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;">Allocation</h6>
-            <div id="allocation-chart" style="position:relative;height:200px;display:flex;align-items:center;justify-content:center;">
-              <canvas id="allocationCanvas"></canvas>
-            </div>
-            <% if (pfSummary.sectorData && pfSummary.sectorData.length > 0) { %>
-              <div style="margin-top:var(--space-4);">
-                <% pfSummary.sectorData.forEach(function(s, i) { %>
-                  <div class="d-flex justify-content-between align-items-center" style="padding:4px 0;font-size:var(--text-xs);">
-                    <div class="d-flex align-items-center gap-2">
-                      <span style="width:8px;height:8px;border-radius:50%;background:var(--chart-color-<%= i %>);display:inline-block;"></span>
-                      <span class="text-secondary"><%= s.sector %></span>
-                    </div>
-                    <span class="tabular-nums fw-600" style="color:var(--text-primary);"><%= s.percent %>%</span>
-                  </div>
-                <% }); %>
-              </div>
-            <% } %>
-          </div>
-        </div>
-      </div>
-    <% } else { %>
-      <div class="card card-gold mb-4" style="padding:var(--space-8);text-align:center;">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto var(--space-4);display:block;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-        <h5 class="mb-2" style="font-weight:700;">Start Your Portfolio</h5>
-        <p class="text-secondary mb-4" style="font-size:var(--text-sm);max-width:400px;margin:0 auto;">Add your first stock holding to start tracking your investments on the DSE.</p>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Add First Stock
+        <button class="btn btn-outline-gold btn-sm" data-bs-toggle="modal" data-bs-target="#sellModal" id="sellBtnDesktop" <%= pfHoldings.length === 0 ? 'disabled' : '' %>>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline></svg>
+          Sell Shares
         </button>
       </div>
-    <% } %>
-
-    <!-- Holdings -->
-    <div class="card" style="padding:var(--space-5);">
-      <div id="portfolio-holdings">
-        <%- include('../fragments/portfolio-holdings', { holdings: pfHoldings, stockMap: pfStockMap, portfolioSummary: pfSummary, allStocks: pfAllStocks }) %>
-      </div>
     </div>
 
-    <!-- Transaction History -->
-    <% if (pfHoldings.length > 0) { %>
-      <%
-        // Collect all transactions from all holdings, tag with symbol
-        const allTransactions = [];
-        pfHoldings.forEach(function(h) {
-          if (h.transactions && h.transactions.length > 0) {
-            h.transactions.forEach(function(t) {
-              allTransactions.push({ ...t, symbol: h.symbol });
-            });
-          }
-        });
-        // Sort by date descending
-        allTransactions.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-      %>
-      <div class="card mt-4" style="padding:var(--space-5);">
-        <h6 class="mb-3 d-flex align-items-center gap-2" style="font-weight:600;font-size:var(--text-sm);color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          Transaction History (<%= allTransactions.length %>)
-        </h6>
-
-        <% if (allTransactions.length === 0) { %>
-          <div class="empty-state" style="padding:var(--space-8) 0;">
-            <p class="empty-state-text">No transactions recorded yet. Buy or sell shares to see history here.</p>
-          </div>
-        <% } else { %>
-
-          <!-- Mobile Cards (< md) -->
-          <div class="d-md-none">
-            <% allTransactions.forEach(function(t) {
-              const isBuy = t.type === 'buy';
-              const txColor = isBuy ? 'var(--green)' : 'var(--red)';
-              const txBg = isBuy ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
-              const txDate = new Date(t.date);
-              const dateStr = txDate.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-            %>
-              <div style="background:var(--bg-hover);border-radius:var(--border-radius);padding:var(--space-3) var(--space-4);margin-bottom:var(--space-2);border:1px solid var(--border-default);">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="badge" style="background:<%= txBg %>;color:<%= txColor %>;font-size:10px;padding:3px 8px;border-radius:var(--border-radius-full);text-transform:uppercase;font-weight:700;">
-                      <%= t.type %>
-                    </span>
-                    <span class="fw-700" style="font-size:var(--text-sm);color:var(--text-primary);"><%= t.symbol %></span>
-                  </div>
-                  <span class="text-muted" style="font-size:10px;"><%= dateStr %></span>
-                </div>
-                <div class="d-flex justify-content-between" style="font-size:var(--text-xs);">
-                  <span class="text-secondary"><%= t.shares.toLocaleString('en-TZ') %> shares @ TZS <%= t.price.toLocaleString('en-TZ') %></span>
-                  <span class="fw-600 tabular-nums" style="color:var(--text-primary);">TZS <%= (t.shares * t.price).toLocaleString('en-TZ', {maximumFractionDigits:0}) %></span>
-                </div>
-                <% if (t.notes) { %>
-                  <p class="text-muted mb-0 mt-1" style="font-size:10px;"><%= t.notes %></p>
-                <% } %>
-              </div>
-            <% }); %>
-          </div>
-
-          <!-- Desktop Table (>= md) -->
-          <div class="d-none d-md-block table-container">
-            <table class="table" style="background:transparent;--bs-table-bg:transparent;">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th>Stock</th>
-                  <th class="text-end">Shares</th>
-                  <th class="text-end">Price (TZS)</th>
-                  <th class="text-end">Total (TZS)</th>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% allTransactions.forEach(function(t) {
-                  const isBuy = t.type === 'buy';
-                  const txColor = isBuy ? 'var(--green)' : 'var(--red)';
-                  const txBg = isBuy ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
-                  const txDate = new Date(t.date);
-                  const dateStr = txDate.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-                %>
-                  <tr>
-                    <td class="tabular-nums" style="font-size:var(--text-sm);white-space:nowrap;"><%= dateStr %></td>
-                    <td>
-                      <span class="badge" style="background:<%= txBg %>;color:<%= txColor %>;font-size:10px;padding:3px 10px;border-radius:var(--border-radius-full);text-transform:uppercase;font-weight:700;">
-                        <%= t.type %>
-                      </span>
-                    </td>
-                    <td class="fw-700" style="font-size:var(--text-sm);"><%= t.symbol %></td>
-                    <td class="text-end tabular-nums" style="font-size:var(--text-sm);"><%= t.shares.toLocaleString('en-TZ') %></td>
-                    <td class="text-end tabular-nums" style="font-size:var(--text-sm);"><%= t.price.toLocaleString('en-TZ') %></td>
-                    <td class="text-end tabular-nums fw-600" style="font-size:var(--text-sm);"><%= (t.shares * t.price).toLocaleString('en-TZ', {maximumFractionDigits:0}) %></td>
-                    <td class="text-secondary" style="font-size:var(--text-xs);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= t.notes || '—' %></td>
-                  </tr>
-                <% }); %>
-              </tbody>
-            </table>
-          </div>
-        <% } %>
+    <div id="portfolio-content-wrap" class="position-relative">
+      <div id="portfolio-content">
+        <%- include('../fragments/portfolio-content', { holdings: pfHoldings, stockMap: pfStockMap, portfolioSummary: pfSummary, allStocks: pfAllStocks, transactions: pfTransactions }) %>
       </div>
-    <% } %>
-
+      <div class="portfolio-sync-indicator htmx-indicator" id="portfolio-content-indicator">
+        <span class="spinner spinner-sm"></span>
+        <span>Syncing portfolio...</span>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- Buy Modal -->
+<div class="mobile-portfolio-actions d-md-none">
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#buyModal">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    Buy
+  </button>
+  <button class="btn btn-outline-gold btn-sm" data-bs-toggle="modal" data-bs-target="#sellModal" id="sellBtnMobile" <%= pfHoldings.length === 0 ? 'disabled' : '' %>>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline></svg>
+    Sell
+  </button>
+</div>
+
 <div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content" style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:var(--border-radius-lg);">
       <div class="modal-header" style="border-bottom:1px solid var(--border-default);padding:var(--space-5) var(--space-6);">
         <h5 class="modal-title" id="buyModalLabel" style="font-weight:700;color:var(--text-primary);">
@@ -192,18 +61,19 @@
       </div>
       <div class="modal-body" style="padding:var(--space-6);">
         <form
+          id="buyForm"
           hx-post="/api/portfolio/add"
-          hx-target="#portfolio-holdings"
+          hx-target="#portfolio-content"
           hx-swap="innerHTML"
-          hx-indicator="#buy-indicator"
-          hx-on::after-request="if(event.detail.successful){this.reset();bootstrap.Modal.getInstance(document.getElementById('buyModal')).hide();}"
+          hx-indicator="#buy-submit-indicator"
+          hx-disabled-elt="find button[type='submit']"
         >
           <div class="mb-3">
             <label class="form-label">Stock</label>
             <select name="symbol" class="form-select" required>
               <option value="">Select stock...</option>
               <% pfAllStocks.forEach(function(s) { %>
-                <option value="<%= s.symbol %>"><%= s.symbol %> — <%= s.companyName || s.symbol %></option>
+                <option value="<%= s.symbol %>"><%= s.symbol %> - <%= s.companyName || s.symbol %></option>
               <% }); %>
             </select>
           </div>
@@ -226,7 +96,7 @@
             <input type="text" name="notes" class="form-input" placeholder="e.g. Long-term hold">
           </div>
           <button type="submit" class="btn btn-success w-100">
-            <span class="htmx-indicator me-2" id="buy-indicator"><span class="spinner spinner-sm"></span></span>
+            <span class="htmx-indicator me-2" id="buy-submit-indicator"><span class="spinner spinner-sm"></span></span>
             Confirm Purchase
           </button>
         </form>
@@ -235,9 +105,8 @@
   </div>
 </div>
 
-<!-- Sell Modal -->
 <div class="modal fade" id="sellModal" tabindex="-1" aria-labelledby="sellModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content" style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:var(--border-radius-lg);">
       <div class="modal-header" style="border-bottom:1px solid var(--border-default);padding:var(--space-5) var(--space-6);">
         <h5 class="modal-title" id="sellModalLabel" style="font-weight:700;color:var(--text-primary);">
@@ -248,18 +117,19 @@
       </div>
       <div class="modal-body" style="padding:var(--space-6);">
         <form
+          id="sellForm"
           hx-post="/api/portfolio/sell"
-          hx-target="#portfolio-holdings"
+          hx-target="#portfolio-content"
           hx-swap="innerHTML"
-          hx-indicator="#sell-indicator"
-          hx-on::after-request="if(event.detail.successful){this.reset();bootstrap.Modal.getInstance(document.getElementById('sellModal')).hide();}"
+          hx-indicator="#sell-submit-indicator"
+          hx-disabled-elt="find button[type='submit']"
         >
           <div class="mb-3">
             <label class="form-label">Stock to Sell</label>
             <select name="symbol" class="form-select" required id="sellSymbolSelect">
               <option value="">Select stock...</option>
               <% if (pfSummary.holdings) { pfSummary.holdings.forEach(function(h) { %>
-                <option value="<%= h.symbol %>" data-max="<%= h.shares %>"><%= h.symbol %> — <%= h.shares.toLocaleString() %> shares owned</option>
+                <option value="<%= h.symbol %>" data-max="<%= h.shares %>"><%= h.symbol %> - <%= h.shares.toLocaleString() %> shares owned</option>
               <% }); } %>
             </select>
           </div>
@@ -279,7 +149,7 @@
             <input type="text" name="notes" class="form-input" placeholder="e.g. Taking profit">
           </div>
           <button type="submit" class="btn btn-danger w-100">
-            <span class="htmx-indicator me-2" id="sell-indicator"><span class="spinner spinner-sm"></span></span>
+            <span class="htmx-indicator me-2" id="sell-submit-indicator"><span class="spinner spinner-sm"></span></span>
             Confirm Sale
           </button>
         </form>
@@ -289,25 +159,105 @@
 </div>
 
 <script>
-  // Update max shares hint when sell stock selection changes
   (function() {
+    function syncSellOptions() {
+      const dataEl = document.getElementById('portfolio-holdings-data');
+      const select = document.getElementById('sellSymbolSelect');
+      const desktopSellBtn = document.getElementById('sellBtnDesktop');
+      const mobileSellBtn = document.getElementById('sellBtnMobile');
+      if (!dataEl || !select) return;
+
+      let holdings = [];
+      try {
+        holdings = JSON.parse(dataEl.textContent || '[]');
+      } catch (err) {
+        holdings = [];
+      }
+
+      const previous = select.value;
+      const nextOptions = ['<option value="">Select stock...</option>'];
+      holdings.forEach(function(h) {
+        const shares = Number(h.shares || 0);
+        nextOptions.push('<option value="' + h.symbol + '" data-max="' + shares + '">' + h.symbol + ' - ' + shares.toLocaleString() + ' shares owned</option>');
+      });
+      select.innerHTML = nextOptions.join('');
+      if (previous) select.value = previous;
+
+      if (desktopSellBtn) {
+        desktopSellBtn.disabled = holdings.length === 0;
+      }
+      if (mobileSellBtn) {
+        mobileSellBtn.disabled = holdings.length === 0;
+      }
+    }
+
     const sel = document.getElementById('sellSymbolSelect');
     const inp = document.getElementById('sellSharesInput');
     const hint = document.getElementById('sellMaxHint');
     const maxVal = document.getElementById('sellMaxValue');
     if (!sel || !inp) return;
 
+    function closeModalFully(modalId) {
+      const modalEl = document.getElementById(modalId);
+      if (!modalEl || typeof bootstrap === 'undefined') return;
+
+      const instance = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+
+      const cleanup = function() {
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+        modalEl.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+        document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+          backdrop.remove();
+        });
+      };
+
+      modalEl.addEventListener('hidden.bs.modal', cleanup, { once: true });
+      instance.hide();
+
+      // Fallback in case hidden event is skipped due async swap timing.
+      setTimeout(cleanup, 400);
+    }
+
     sel.addEventListener('change', function() {
       const opt = this.options[this.selectedIndex];
       const max = opt.dataset.max;
       if (max) {
         inp.max = max;
-        maxVal.textContent = parseInt(max).toLocaleString();
+        maxVal.textContent = parseInt(max, 10).toLocaleString();
         hint.style.display = 'block';
       } else {
         inp.removeAttribute('max');
         hint.style.display = 'none';
       }
     });
+
+    if (!window.__portfolioGlobalHandlersBound) {
+      document.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail && event.detail.target && event.detail.target.id === 'portfolio-content') {
+          syncSellOptions();
+        }
+      });
+
+      document.addEventListener('htmx:afterRequest', function(event) {
+        if (!event.detail || !event.detail.successful || !event.detail.elt) return;
+
+        if (event.detail.elt.id === 'buyForm') {
+          event.detail.elt.reset();
+          closeModalFully('buyModal');
+        }
+
+        if (event.detail.elt.id === 'sellForm') {
+          event.detail.elt.reset();
+          closeModalFully('sellModal');
+        }
+      });
+
+      window.__portfolioGlobalHandlersBound = true;
+    }
+
+    syncSellOptions();
   })();
 </script>

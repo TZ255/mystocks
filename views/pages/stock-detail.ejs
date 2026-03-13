@@ -49,14 +49,16 @@
         <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
           <button
             id="watchlist-btn"
-            class="btn <%= sdWatched ? 'btn-primary' : 'btn-ghost' %> btn-sm"
+            class="btn <%= sdWatched ? 'btn-primary' : 'btn-ghost' %> btn-sm watch-toggle-btn"
+            data-symbol="<%= sd.symbol %>"
+            data-watched="<%= sdWatched ? 'true' : 'false' %>"
             hx-post="/api/watchlist/toggle/<%= sd.symbol %>"
             hx-swap="none"
             hx-indicator="#watchlist-btn"
-            hx-on::after-request="if(event.detail.successful){const b=document.getElementById('watchlist-btn');b.classList.toggle('btn-primary');b.classList.toggle('btn-ghost');const t=b.querySelector('span');t.textContent=t.textContent.trim()==='Watching'?'Watch':'Watching';}"
           >
+            <span class="htmx-indicator me-1"><span class="spinner spinner-sm"></span></span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="<%= sdWatched ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            <span><%= sdWatched ? 'Watching' : 'Watch' %></span>
+            <span class="watch-toggle-label"><%= sdWatched ? 'Watching' : 'Watch' %></span>
           </button>
         <% } %>
       </div>

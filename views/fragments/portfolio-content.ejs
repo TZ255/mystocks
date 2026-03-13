@@ -1,0 +1,53 @@
+<%
+  const pcHoldings = typeof holdings !== 'undefined' ? holdings : [];
+  const pcStockMap = typeof stockMap !== 'undefined' ? stockMap : {};
+  const pcSummary = typeof portfolioSummary !== 'undefined' ? portfolioSummary : {};
+  const pcTransactions = typeof transactions !== 'undefined' ? transactions : [];
+%>
+
+<% if (pcHoldings.length > 0) { %>
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <%- include('../partials/portfolio-summary', { portfolioSummary: pcSummary }) %>
+    </div>
+    <div class="col-lg-4">
+      <div class="card h-100" style="padding:var(--space-5);">
+        <h6 class="mb-3" style="font-weight:600;font-size:var(--text-sm);color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;">Allocation</h6>
+        <div id="allocation-chart" style="position:relative;height:200px;display:flex;align-items:center;justify-content:center;">
+          <canvas id="allocationCanvas"></canvas>
+        </div>
+        <% if (pcSummary.sectorData && pcSummary.sectorData.length > 0) { %>
+          <div style="margin-top:var(--space-4);">
+            <% pcSummary.sectorData.forEach(function(s, i) { %>
+              <div class="d-flex justify-content-between align-items-center" style="padding:4px 0;font-size:var(--text-xs);">
+                <div class="d-flex align-items-center gap-2">
+                  <span style="width:8px;height:8px;border-radius:50%;background:var(--chart-color-<%= i %>);display:inline-block;"></span>
+                  <span class="text-secondary"><%= s.sector %></span>
+                </div>
+                <span class="tabular-nums fw-600" style="color:var(--text-primary);"><%= s.percent %>%</span>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+<% } else { %>
+  <div class="card card-gold mb-4" style="padding:var(--space-8);text-align:center;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto var(--space-4);display:block;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+    <h5 class="mb-2" style="font-weight:700;">Start Your Portfolio</h5>
+    <p class="text-secondary mb-4" style="font-size:var(--text-sm);max-width:400px;margin:0 auto;">Add your first stock holding to start tracking your investments on the DSE.</p>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Add First Stock
+    </button>
+  </div>
+<% } %>
+
+<div class="card loading-shell" style="padding:var(--space-5);">
+  <%- include('../fragments/portfolio-holdings', { holdings: pcHoldings, stockMap: pcStockMap, portfolioSummary: pcSummary }) %>
+</div>
+
+<%- include('../fragments/portfolio-transactions', { transactions: pcTransactions }) %>
+
+<script type="application/json" id="portfolio-holdings-data"><%- JSON.stringify((pcSummary.holdings || []).map((h) => ({ symbol: h.symbol, shares: h.shares }))) %></script>

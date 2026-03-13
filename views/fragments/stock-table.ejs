@@ -16,13 +16,13 @@
       <td style="padding:var(--space-3) var(--space-5);">
         <span class="fw-700" style="font-size:var(--text-sm);"><%= s.symbol %></span>
       </td>
-      <td style="padding:var(--space-3) var(--space-5);">
+      <td class="d-none d-sm-table-cell" style="padding:var(--space-3) var(--space-5);">
         <span class="text-secondary" style="font-size:var(--text-sm);"><%= s.companyName || s.symbol %></span>
       </td>
       <td class="text-end" style="padding:var(--space-3) var(--space-5);">
         <span class="tabular-nums fw-600" style="font-size:var(--text-sm);"><%= s.price ? s.price.toLocaleString('en-TZ') : '0' %></span>
       </td>
-      <td class="text-end" style="padding:var(--space-3) var(--space-5);">
+      <td class="text-end d-none d-sm-table-cell" style="padding:var(--space-3) var(--space-5);">
         <span class="tabular-nums <%= colorCls %>" style="font-size:var(--text-sm);"><%= prefix %><%= s.change ? s.change.toFixed(2) : '0.00' %></span>
       </td>
       <td class="text-end" style="padding:var(--space-3) var(--space-5);">

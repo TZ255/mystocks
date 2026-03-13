@@ -1,113 +1,129 @@
-<nav class="navbar navbar-dark navbar-expand-lg fixed-top" id="main-nav">
-  <div class="container-hisa">
-
-    <!-- Logo -->
+<nav class="navbar navbar-dark fixed-top" id="main-nav">
+  <div class="container-hisa nav-shell">
     <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-        <polyline points="16 7 22 7 22 13"></polyline>
-      </svg>
-      <span style="font-size:var(--text-xl);font-weight:800;letter-spacing:-0.03em;color:var(--text-primary);">Hisa<span style="color:var(--gold);">Zangu</span></span>
+      <i class="fa-solid fa-chart-line" style="font-size: 1.4rem; color: var(--gold);" aria-hidden="true"></i>
+      <span class="brand-wordmark">Hisa<span style="color:var(--gold);">Zangu</span></span>
     </a>
 
-    <!-- Mobile Toggle -->
-    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navContent" aria-controls="navContent" aria-expanded="false" aria-label="Toggle navigation">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    </button>
-
-    <!-- Nav Content -->
-    <div class="collapse navbar-collapse" id="navContent">
-      <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
-        <!-- Authenticated Links -->
-        <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
-          <li class="nav-item">
-            <a class="nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/dashboard' ? 'active' : '' %>" href="/dashboard">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              Dashboard
+    <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
+      <div class="desktop-nav-wrap d-none d-lg-flex align-items-center ms-auto gap-3">
+        <ul class="desktop-nav-links">
+          <li>
+            <a href="/dashboard" data-route="/dashboard" data-match="exact" class="desktop-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/dashboard' ? 'active' : '' %>">
+              <i class="fa-solid fa-table-cells-large" aria-hidden="true"></i>
+              <span>Dashboard</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link <%= typeof currentPath !== 'undefined' && currentPath.startsWith('/stocks') ? 'active' : '' %>" href="/stocks">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-              Stocks
+          <li>
+            <a href="/stocks" data-route="/stocks" data-match="prefix" class="desktop-nav-link <%= typeof currentPath !== 'undefined' && currentPath.startsWith('/stocks') ? 'active' : '' %>">
+              <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
+              <span>Stocks</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/portfolio' ? 'active' : '' %>" href="/portfolio">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-              Portfolio
+          <li>
+            <a href="/portfolio" data-route="/portfolio" data-match="exact" class="desktop-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/portfolio' ? 'active' : '' %>">
+              <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+              <span>Portfolio</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/watchlist' ? 'active' : '' %>" href="/watchlist">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-              Watchlist
+          <li>
+            <a href="/watchlist" data-route="/watchlist" data-match="exact" class="desktop-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/watchlist' ? 'active' : '' %>">
+              <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              <span>Watchlist</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/alerts' ? 'active' : '' %>" href="/alerts">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-              Alerts
-            </a>
-          </li>
-
-          <!-- User Dropdown -->
-          <li class="nav-item dropdown ms-lg-2">
-            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 py-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <% if (typeof user !== 'undefined' && user && user.image) { %>
-                <img src="<%= user.image %>" alt="<%= user.displayName %>" class="rounded-circle" width="30" height="30" style="border:2px solid var(--gold);" referrerpolicy="no-referrer">
-              <% } else { %>
-                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:30px;height:30px;background:var(--gold);color:var(--bg-primary);font-weight:700;font-size:var(--text-xs);">
-                  <%= typeof user !== 'undefined' && user ? user.firstName.charAt(0) : 'U' %>
-                </div>
-              <% } %>
-              <span class="d-none d-lg-inline" style="font-size:var(--text-sm);color:var(--text-secondary);">
-                <%= typeof user !== 'undefined' && user ? user.firstName : '' %>
-              </span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" style="background:var(--bg-card);border:1px solid var(--border-default);box-shadow:var(--shadow-xl);">
-              <li>
-                <a class="dropdown-item" href="/dashboard" style="color:var(--text-secondary);font-size:var(--text-sm);">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                  Profile
-                </a>
-              </li>
-              <li><hr class="dropdown-divider" style="border-color:var(--border-default);"></li>
-              <li>
-                <a class="dropdown-item" href="/auth/logout" style="color:var(--red);font-size:var(--text-sm);">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                  Sign Out
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      <% } else { %>
-        <!-- Guest Links -->
-        <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-          <li class="nav-item">
-            <a class="nav-link" href="/stocks">Stocks</a>
-          </li>
-          <li class="nav-item">
-            <a class="btn btn-gold btn-sm px-4" href="/auth/google">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              Sign in
+          <li>
+            <a href="/alerts" data-route="/alerts" data-match="exact" class="desktop-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/alerts' ? 'active' : '' %>">
+              <i class="fa-solid fa-bell" aria-hidden="true"></i>
+              <span>Alerts</span>
             </a>
           </li>
         </ul>
-      <% } %>
-    </div>
+
+        <div class="nav-item dropdown">
+          <a class="profile-chip dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <% if (typeof user !== 'undefined' && user && user.image) { %>
+              <img src="<%= user.image %>" alt="<%= user.displayName %>" class="rounded-circle" width="30" height="30" referrerpolicy="no-referrer">
+            <% } else { %>
+              <span class="profile-avatar-fallback"><%= typeof user !== 'undefined' && user ? user.firstName.charAt(0) : 'U' %></span>
+            <% } %>
+            <span class="profile-chip-name"><%= typeof user !== 'undefined' && user ? (user.firstName || user.displayName) : '' %></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" style="background:var(--bg-card);border:1px solid var(--border-default);box-shadow:var(--shadow-xl);">
+            <li><a class="dropdown-item" href="/dashboard">Profile</a></li>
+            <li><hr class="dropdown-divider" style="border-color:var(--border-default);"></li>
+            <li><a class="dropdown-item" href="/auth/logout" style="color:var(--red);">Sign Out</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="d-flex d-lg-none align-items-center gap-2 ms-auto">
+        <a href="/stocks" class="btn btn-icon btn-sm btn-ghost" aria-label="Stocks">
+          <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
+        </a>
+        <button class="btn btn-icon btn-sm btn-ghost" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavPanel" aria-controls="mobileNavPanel" aria-label="Open navigation">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i>
+        </button>
+      </div>
+    <% } else { %>
+      <div class="desktop-nav-wrap d-none d-lg-flex align-items-center ms-auto gap-3">
+        <ul class="desktop-nav-links">
+          <li><a href="/stocks" data-route="/stocks" data-match="prefix" class="desktop-nav-link <%= typeof currentPath !== 'undefined' && currentPath.startsWith('/stocks') ? 'active' : '' %>">Stocks</a></li>
+          <li><a href="/privacy" data-route="/privacy" data-match="exact" class="desktop-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/privacy' ? 'active' : '' %>">Privacy</a></li>
+          <li><a href="/terms" data-route="/terms" data-match="exact" class="desktop-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/terms' ? 'active' : '' %>">Terms</a></li>
+        </ul>
+        <a class="btn btn-gold btn-sm px-4" href="/auth/google">Sign in</a>
+      </div>
+
+      <div class="d-flex d-lg-none align-items-center gap-2 ms-auto">
+        <a href="/auth/google" class="btn btn-gold btn-sm px-3">Sign in</a>
+        <button class="btn btn-icon btn-sm btn-ghost" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavPanel" aria-controls="mobileNavPanel" aria-label="Open navigation">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i>
+        </button>
+      </div>
+    <% } %>
   </div>
 </nav>
 
-<!-- Spacer for fixed nav -->
-<div style="height: 68px;"></div>
+<div class="offcanvas offcanvas-end mobile-nav-panel" tabindex="-1" id="mobileNavPanel" aria-labelledby="mobileNavPanelLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="mobileNavPanelLabel">Menu</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
+      <div class="mobile-user-card">
+        <% if (typeof user !== 'undefined' && user && user.image) { %>
+          <img src="<%= user.image %>" alt="<%= user.displayName %>" class="rounded-circle" width="44" height="44" referrerpolicy="no-referrer">
+        <% } else { %>
+          <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:var(--gold);color:var(--bg-primary);font-weight:700;">
+            <%= typeof user !== 'undefined' && user ? user.firstName.charAt(0) : 'U' %>
+          </div>
+        <% } %>
+        <div>
+          <p class="mb-0 fw-700" style="font-size:var(--text-sm);color:var(--text-primary);"><%= typeof user !== 'undefined' && user ? user.displayName : '' %></p>
+          <p class="mb-0 text-secondary" style="font-size:var(--text-xs);">Manage your account</p>
+        </div>
+      </div>
+
+      <div class="mobile-nav-links">
+        <a class="mobile-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/dashboard' ? 'active' : '' %>" data-route="/dashboard" data-match="exact" href="/dashboard">Dashboard</a>
+        <a class="mobile-nav-link <%= typeof currentPath !== 'undefined' && currentPath.startsWith('/stocks') ? 'active' : '' %>" data-route="/stocks" data-match="prefix" href="/stocks">Stocks</a>
+        <a class="mobile-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/portfolio' ? 'active' : '' %>" data-route="/portfolio" data-match="exact" href="/portfolio">Portfolio</a>
+        <a class="mobile-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/watchlist' ? 'active' : '' %>" data-route="/watchlist" data-match="exact" href="/watchlist">Watchlist</a>
+        <a class="mobile-nav-link <%= typeof currentPath !== 'undefined' && currentPath === '/alerts' ? 'active' : '' %>" data-route="/alerts" data-match="exact" href="/alerts">Alerts</a>
+      </div>
+
+      <a class="btn btn-danger w-100 mt-4" href="/auth/logout">Sign Out</a>
+    <% } else { %>
+      <div class="mobile-nav-links">
+        <a class="mobile-nav-link" data-route="/stocks" data-match="prefix" href="/stocks">Stocks</a>
+        <a class="mobile-nav-link" data-route="/privacy" data-match="exact" href="/privacy">Privacy</a>
+        <a class="mobile-nav-link" data-route="/terms" data-match="exact" href="/terms">Terms</a>
+      </div>
+      <a class="btn btn-gold w-100 mt-4" href="/auth/google">Continue with Google</a>
+    <% } %>
+  </div>
+</div>
+
+<div class="nav-spacer"></div>

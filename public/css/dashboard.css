@@ -30,6 +30,15 @@ main {
   .page-title {
     font-size: var(--text-xl);
   }
+
+  .card {
+    padding: var(--space-4) !important;
+    border-radius: var(--border-radius);
+  }
+
+  .btn {
+    min-height: 42px;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -101,6 +110,59 @@ main {
 .htmx-indicator.htmx-request {
   opacity: 1;
   pointer-events: auto;
+}
+
+#htmx-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: calc(var(--z-fixed) + 2);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+#htmx-progress::before {
+  content: '';
+  display: block;
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transform: translateX(-120%);
+}
+
+body.htmx-busy #htmx-progress {
+  opacity: 1;
+}
+
+body.htmx-busy #htmx-progress::before {
+  animation: htmxProgressSlide 1s linear infinite;
+}
+
+.loading-shell.htmx-request {
+  opacity: 0.7;
+}
+
+.loading-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-shell.htmx-request::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 10%,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  animation: loadingShimmer 0.9s linear infinite;
+  pointer-events: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -248,6 +310,47 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-color: var(--border-hover);
 }
 
+.portfolio-sync-indicator {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius-full);
+  border: 1px solid var(--border-default);
+  background: rgba(11, 15, 26, 0.9);
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  z-index: 3;
+}
+
+.portfolio-sync-indicator.htmx-request,
+.htmx-request .portfolio-sync-indicator {
+  display: inline-flex;
+}
+
+.mobile-portfolio-actions {
+  position: fixed;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  z-index: calc(var(--z-fixed) - 1);
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(11, 15, 26, 0.86);
+}
+
+.mobile-portfolio-actions .btn {
+  flex: 1;
+}
+
 /* --------------------------------------------------------------------------
    Responsive Dashboard
    -------------------------------------------------------------------------- */
@@ -262,6 +365,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     max-width: 100%;
     min-width: 0;
   }
+
+  .portfolio-sync-indicator {
+    top: auto;
+    bottom: var(--space-3);
+    right: var(--space-3);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -271,4 +380,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   body.has-bottom-tabs .site-footer {
     display: none;
   }
+}
+
+@keyframes htmxProgressSlide {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(420%); }
+}
+
+@keyframes loadingShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }

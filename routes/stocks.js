@@ -10,9 +10,22 @@ const router = Router();
 router.get('/', async (req, res) => {
   try {
     const stocks = await Stock.find().sort({ symbol: 1 }).lean();
+    let watchedSymbols = [];
+
+    if (req.isAuthenticated()) {
+      const watchlist = await Watchlist.find({ user: req.user._id }).lean();
+      watchedSymbols = watchlist.map((w) => w.symbol);
+    }
+
+    const watchedSet = new Set(watchedSymbols);
+    const stocksWithState = stocks.map((stock) => ({
+      ...stock,
+      isWatched: watchedSet.has(stock.symbol),
+    }));
+
     res.render('pages/stocks', {
       title: 'DSE Stocks - HisaZangu',
-      stocks,
+      stocks: stocksWithState,
     });
   } catch (err) {
     console.error('Stocks page error:', err);

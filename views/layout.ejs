@@ -19,6 +19,8 @@
 
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" rel="stylesheet">
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="/css/theme.css">
@@ -31,39 +33,54 @@
   <% } %>
 </head>
 <body class="<%= (typeof isAuthenticated !== 'undefined' && isAuthenticated && typeof currentPath !== 'undefined' && currentPath !== '/') ? 'has-bottom-tabs' : '' %>">
+  <div id="htmx-progress" aria-hidden="true"></div>
 
   <%- include('partials/nav') %>
 
   <%- include('partials/flash') %>
 
-  <main>
-    <%- body %>
+  <main id="app-main">
+    <div id="app-content">
+      <%- body %>
+    </div>
   </main>
 
   <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated && typeof currentPath !== 'undefined' && currentPath !== '/') { %>
     <!-- Mobile Bottom Tab Bar -->
-    <nav class="bottom-tab-bar" aria-label="Mobile navigation">
+    <nav
+      class="bottom-tab-bar"
+      aria-label="Mobile navigation"
+      hx-boost="true"
+      hx-target="#app-content"
+      hx-select="#app-content"
+      hx-swap="innerHTML transition:true"
+      hx-push-url="true"
+      hx-indicator="#bottom-nav-indicator"
+    >
       <div class="bottom-tab-bar-inner">
-        <a href="/dashboard" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/dashboard' ? 'active' : '' %>">
+        <a href="/dashboard" data-route="/dashboard" data-match="exact" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/dashboard' ? 'active' : '' %>">
           <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           <span>Home</span>
         </a>
-        <a href="/stocks" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath.startsWith('/stocks') ? 'active' : '' %>">
+        <a href="/stocks" data-route="/stocks" data-match="prefix" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath.startsWith('/stocks') ? 'active' : '' %>">
           <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
           <span>Stocks</span>
         </a>
-        <a href="/portfolio" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/portfolio' ? 'active' : '' %>">
+        <a href="/portfolio" data-route="/portfolio" data-match="exact" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/portfolio' ? 'active' : '' %>">
           <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
           <span>Portfolio</span>
         </a>
-        <a href="/watchlist" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/watchlist' ? 'active' : '' %>">
+        <a href="/watchlist" data-route="/watchlist" data-match="exact" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/watchlist' ? 'active' : '' %>">
           <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           <span>Watch</span>
         </a>
-        <a href="/alerts" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/alerts' ? 'active' : '' %>">
+        <a href="/alerts" data-route="/alerts" data-match="exact" class="bottom-tab-item <%= typeof currentPath !== 'undefined' && currentPath === '/alerts' ? 'active' : '' %>">
           <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
           <span>Alerts</span>
         </a>
+      </div>
+      <div class="bottom-nav-indicator htmx-indicator" id="bottom-nav-indicator">
+        <span class="spinner spinner-sm"></span>
       </div>
     </nav>
   <% } %>

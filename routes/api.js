@@ -5,7 +5,7 @@ import StockHistory from '../models/StockHistory.js';
 import Portfolio from '../models/Portfolio.js';
 import Watchlist from '../models/Watchlist.js';
 import Alert from '../models/Alert.js';
-import { calculatePortfolioSummary } from '../services/portfolioService.js';
+import { calculatePortfolioSummary, collectTransactions } from '../services/portfolioService.js';
 
 const router = Router();
 
@@ -17,22 +17,37 @@ const verifyHtmx = (req, res, next) => {
   next();
 };
 
-// Helper: fetch and render portfolio holdings
-const renderPortfolioHoldings = async (req, res) => {
-  const holdings = await Portfolio.find({ user: req.user._id }).lean();
-  const symbols = holdings.map((h) => h.symbol);
-  const stocks = await Stock.find({ symbol: { $in: symbols } }).lean();
-  const stockMap = {};
-  stocks.forEach((s) => (stockMap[s.symbol] = s));
-  const portfolioSummary = calculatePortfolioSummary(holdings, stockMap);
-  const allStocks = await Stock.find().sort({ symbol: 1 }).lean();
+const buildPortfolioViewData = async (userId) => {
+  const [portfolioDocs, holdings] = await Promise.all([
+    Portfolio.find({ user: userId }).lean(),
+    Portfolio.find({ user: userId, shares: { $gt: 0 } }).lean(),
+  ]);
 
-  res.render('fragments/portfolio-holdings', {
-    layout: false,
+  const symbols = holdings.map((h) => h.symbol);
+  const stocks = symbols.length > 0 ? await Stock.find({ symbol: { $in: symbols } }).lean() : [];
+  const stockMap = {};
+  stocks.forEach((stock) => {
+    stockMap[stock.symbol] = stock;
+  });
+
+  const portfolioSummary = calculatePortfolioSummary(holdings, stockMap);
+  const transactions = collectTransactions(portfolioDocs);
+
+  return {
     holdings,
     stockMap,
     portfolioSummary,
-    allStocks,
+    transactions,
+  };
+};
+
+// Helper: fetch and render portfolio content
+const renderPortfolioContent = async (req, res) => {
+  const data = await buildPortfolioViewData(req.user._id);
+
+  res.render('fragments/portfolio-content', {
+    layout: false,
+    ...data,
   });
 };
 
@@ -79,7 +94,16 @@ router.get('/stocks/table', async (req, res) => {
 router.get('/search', async (req, res) => {
   try {
     const q = (req.query.q || '').trim();
-    if (!q) return res.render('fragments/search-results', { layout: false, results: [] });
+    const isAuthenticated = req.isAuthenticated();
+
+    if (!q) {
+      return res.render('fragments/search-results', {
+        layout: false,
+        results: [],
+        watchedSymbols: [],
+        isAuthenticated,
+      });
+    }
 
     const results = await Stock.find({
       $or: [
@@ -90,7 +114,22 @@ router.get('/search', async (req, res) => {
       .limit(10)
       .lean();
 
-    res.render('fragments/search-results', { layout: false, results });
+    let watchedSymbols = [];
+    if (isAuthenticated && results.length > 0) {
+      const symbols = results.map((result) => result.symbol);
+      const watchlistRows = await Watchlist.find({
+        user: req.user._id,
+        symbol: { $in: symbols },
+      }).lean();
+      watchedSymbols = watchlistRows.map((row) => row.symbol);
+    }
+
+    res.render('fragments/search-results', {
+      layout: false,
+      results,
+      watchedSymbols,
+      isAuthenticated,
+    });
   } catch (err) {
     res.status(500).send('');
   }
@@ -137,34 +176,38 @@ router.post('/watchlist/toggle/:symbol', ensureAuthenticated, verifyHtmx, async 
   try {
     const symbol = req.params.symbol.toUpperCase();
     const existing = await Watchlist.findOne({ user: req.user._id, symbol });
+    let isWatched;
+    let message;
+    let type;
 
     if (existing) {
       await Watchlist.deleteOne({ _id: existing._id });
-      res.render('fragments/toast', {
-        layout: false,
-        message: `${symbol} removed from watchlist`,
-        type: 'info',
-        isWatched: false,
-        symbol,
-      });
+      isWatched = false;
+      message = `${symbol} removed from watchlist`;
+      type = 'info';
     } else {
       await Watchlist.create({ user: req.user._id, symbol });
-      res.render('fragments/toast', {
-        layout: false,
-        message: `${symbol} added to watchlist`,
-        type: 'success',
-        isWatched: true,
-        symbol,
-      });
+      isWatched = true;
+      message = `${symbol} added to watchlist`;
+      type = 'success';
     }
+
+    res.set(
+      'HX-Trigger',
+      JSON.stringify({
+        showToast: { message, type },
+        watchlistChanged: { symbol, isWatched },
+      })
+    );
+    res.status(204).send();
   } catch (err) {
-    res.status(500).render('fragments/toast', {
-      layout: false,
-      message: 'An error occurred',
-      type: 'error',
-      isWatched: false,
-      symbol: req.params.symbol,
-    });
+    res.set(
+      'HX-Trigger',
+      JSON.stringify({
+        showToast: { message: 'An error occurred', type: 'error' },
+      })
+    );
+    res.status(500).send();
   }
 });
 
@@ -173,7 +216,7 @@ router.get('/watchlist/items', ensureAuthenticated, async (req, res) => {
   try {
     const watchlistItems = await Watchlist.find({ user: req.user._id }).lean();
     const symbols = watchlistItems.map((w) => w.symbol);
-    const stocks = await Stock.find({ symbol: { $in: symbols } }).lean();
+    const stocks = await Stock.find({ symbol: { $in: symbols } }).sort({ symbol: 1 }).lean();
     res.render('fragments/watchlist-items', { layout: false, stocks });
   } catch (err) {
     res.status(500).send('<p class="text-red">Error loading watchlist</p>');
@@ -197,17 +240,34 @@ router.post('/portfolio/add', ensureAuthenticated, verifyHtmx, async (req, res) 
     const buyPrice = parseFloat(avgBuyPrice);
     const date = purchaseDate ? new Date(purchaseDate) : new Date();
 
+    if (!Number.isFinite(shareCount) || shareCount <= 0 || !Number.isFinite(buyPrice) || buyPrice <= 0) {
+      return res.status(400).render('fragments/toast', {
+        layout: false,
+        message: 'Enter valid share count and buy price',
+        type: 'error',
+      });
+    }
+
     const existing = await Portfolio.findOne({ user: req.user._id, symbol: symbol.toUpperCase() });
 
     if (existing) {
-      // Average up: recalculate weighted average buy price
-      const totalOldCost = existing.shares * existing.avgBuyPrice;
-      const totalNewCost = shareCount * buyPrice;
-      const newTotalShares = existing.shares + shareCount;
-      const newAvgPrice = (totalOldCost + totalNewCost) / newTotalShares;
+      if (existing.shares > 0) {
+        // Recalculate weighted average when adding to an existing open position
+        const totalOldCost = existing.shares * existing.avgBuyPrice;
+        const totalNewCost = shareCount * buyPrice;
+        const newTotalShares = existing.shares + shareCount;
+        const newAvgPrice = (totalOldCost + totalNewCost) / newTotalShares;
 
-      existing.shares = newTotalShares;
-      existing.avgBuyPrice = parseFloat(newAvgPrice.toFixed(2));
+        existing.shares = newTotalShares;
+        existing.avgBuyPrice = parseFloat(newAvgPrice.toFixed(2));
+      } else {
+        // Re-open a previously closed position
+        existing.shares = shareCount;
+        existing.avgBuyPrice = buyPrice;
+        existing.purchaseDate = date;
+      }
+
+      existing.notes = notes || existing.notes || '';
       existing.transactions.push({
         type: 'buy',
         shares: shareCount,
@@ -234,7 +294,7 @@ router.post('/portfolio/add', ensureAuthenticated, verifyHtmx, async (req, res) 
       });
     }
 
-    await renderPortfolioHoldings(req, res);
+    await renderPortfolioContent(req, res);
   } catch (err) {
     console.error('Portfolio add error:', err);
     res.status(500).render('fragments/toast', {
@@ -261,7 +321,19 @@ router.post('/portfolio/sell', ensureAuthenticated, verifyHtmx, async (req, res)
     const shareCount = parseFloat(shares);
     const price = parseFloat(sellPrice);
 
-    const holding = await Portfolio.findOne({ user: req.user._id, symbol: symbol.toUpperCase() });
+    if (!Number.isFinite(shareCount) || shareCount <= 0 || !Number.isFinite(price) || price <= 0) {
+      return res.status(400).render('fragments/toast', {
+        layout: false,
+        message: 'Enter valid share count and sell price',
+        type: 'error',
+      });
+    }
+
+    const holding = await Portfolio.findOne({
+      user: req.user._id,
+      symbol: symbol.toUpperCase(),
+      shares: { $gt: 0 },
+    });
 
     if (!holding) {
       return res.status(400).render('fragments/toast', {
@@ -288,15 +360,11 @@ router.post('/portfolio/sell', ensureAuthenticated, verifyHtmx, async (req, res)
       notes: notes || '',
     });
 
-    if (shareCount === holding.shares) {
-      // Sold all shares — remove the holding
-      await Portfolio.deleteOne({ _id: holding._id });
-    } else {
-      holding.shares -= shareCount;
-      await holding.save();
-    }
+    holding.shares = parseFloat((holding.shares - shareCount).toFixed(6));
+    if (holding.shares < 0) holding.shares = 0;
+    await holding.save();
 
-    await renderPortfolioHoldings(req, res);
+    await renderPortfolioContent(req, res);
   } catch (err) {
     console.error('Portfolio sell error:', err);
     res.status(500).render('fragments/toast', {
@@ -311,7 +379,7 @@ router.post('/portfolio/sell', ensureAuthenticated, verifyHtmx, async (req, res)
 router.delete('/portfolio/remove/:id', ensureAuthenticated, verifyHtmx, async (req, res) => {
   try {
     await Portfolio.deleteOne({ _id: req.params.id, user: req.user._id });
-    await renderPortfolioHoldings(req, res);
+    await renderPortfolioContent(req, res);
   } catch (err) {
     res.status(500).render('fragments/toast', {
       layout: false,
@@ -334,7 +402,7 @@ router.get('/portfolio/form', ensureAuthenticated, async (req, res) => {
 // ── Portfolio Chart Data (allocation) ──
 router.get('/portfolio/chart-data', ensureAuthenticated, async (req, res) => {
   try {
-    const holdings = await Portfolio.find({ user: req.user._id }).lean();
+    const holdings = await Portfolio.find({ user: req.user._id, shares: { $gt: 0 } }).lean();
     const symbols = holdings.map((h) => h.symbol);
     const stocks = await Stock.find({ symbol: { $in: symbols } }).lean();
     const stockMap = {};

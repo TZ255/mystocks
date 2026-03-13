@@ -115,7 +115,7 @@
           </div>
           <div
             hx-get="/api/watchlist/items"
-            hx-trigger="load"
+            hx-trigger="load, watchlistChanged from:body"
             hx-swap="innerHTML"
             hx-indicator="#watchlist-loader"
           >

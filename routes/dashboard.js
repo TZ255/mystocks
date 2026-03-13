@@ -12,7 +12,7 @@ const router = Router();
 router.get('/', ensureAuthenticated, async (req, res) => {
   try {
     const [holdings, watchlistItems, alerts, gainers, losers] = await Promise.all([
-      Portfolio.find({ user: req.user._id }).lean(),
+      Portfolio.find({ user: req.user._id, shares: { $gt: 0 } }).lean(),
       Watchlist.find({ user: req.user._id }).lean(),
       Alert.find({ user: req.user._id, active: true }).lean(),
       Stock.find({ changePercent: { $gt: 0 } }).sort({ changePercent: -1 }).limit(5).lean(),

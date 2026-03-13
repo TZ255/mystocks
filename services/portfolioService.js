@@ -56,3 +56,22 @@ export const calculatePortfolioSummary = (holdings, stockMap) => {
     sectorData,
   };
 };
+
+export const collectTransactions = (portfolioDocs) => {
+  const transactions = [];
+
+  for (const holding of portfolioDocs) {
+    if (!holding.transactions || holding.transactions.length === 0) continue;
+
+    for (const tx of holding.transactions) {
+      transactions.push({
+        ...tx,
+        symbol: holding.symbol,
+      });
+    }
+  }
+
+  transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  return transactions;
+};

@@ -1,17 +1,11 @@
 <%
   const phHoldings = typeof holdings !== 'undefined' ? holdings : [];
-  const phStockMap = typeof stockMap !== 'undefined' ? stockMap : {};
   const phSummary = typeof portfolioSummary !== 'undefined' ? portfolioSummary : {};
   const phEnriched = phSummary.holdings || [];
 %>
 
-<!-- Portfolio Summary -->
-<% if (phHoldings.length > 0) { %>
-  <%- include('../partials/portfolio-summary', { portfolioSummary: phSummary }) %>
-<% } %>
-
 <!-- Holdings Table -->
-<div style="margin-top:var(--space-5);">
+<div>
   <h6 class="mb-3 d-flex align-items-center justify-content-between" style="font-weight:600;font-size:var(--text-sm);color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;">
     <span>Holdings (<%= phHoldings.length %>)</span>
   </h6>
@@ -58,12 +52,18 @@
               <span class="fw-600 tabular-nums"><%= h.currentValue ? h.currentValue.toLocaleString('en-TZ', {maximumFractionDigits:0}) : '0' %></span>
             </div>
           </div>
+          <div class="d-flex justify-content-between align-items-center mt-2" style="font-size:var(--text-xs);">
+            <span class="text-muted">P/L</span>
+            <span class="tabular-nums fw-700" style="color:<%= gainColor %>;">
+              <%= gainPrefix %><%= (h.gain || 0).toLocaleString('en-TZ', {maximumFractionDigits:0}) %> TZS
+            </span>
+          </div>
           <div class="d-flex justify-content-between align-items-center mt-3 pt-2" style="border-top:1px solid var(--border-default);">
             <span class="tabular-nums" style="font-size:var(--text-xs);color:<%= dailyColor %>;">Today: <%= dailyUp ? '+' : '' %><%= (h.changePercent || 0).toFixed(2) %>%</span>
             <button
               class="btn btn-icon btn-sm btn-ghost"
               hx-delete="/api/portfolio/remove/<%= h._id %>"
-              hx-target="#portfolio-holdings"
+              hx-target="#portfolio-content"
               hx-swap="innerHTML"
               hx-confirm="Remove <%= h.symbol %> from portfolio?"
               hx-indicator="closest .holding-card"
@@ -128,7 +128,7 @@
                 <button
                   class="btn btn-icon btn-sm btn-ghost"
                   hx-delete="/api/portfolio/remove/<%= h._id %>"
-                  hx-target="#portfolio-holdings"
+                  hx-target="#portfolio-content"
                   hx-swap="innerHTML"
                   hx-confirm="Remove <%= h.symbol %> from portfolio?"
                   hx-indicator="closest tr"

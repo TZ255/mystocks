@@ -1,0 +1,86 @@
+<%
+  const txItems = typeof transactions !== 'undefined' ? transactions : [];
+%>
+
+<div class="card mt-4" style="padding:var(--space-5);">
+  <h6 class="mb-3 d-flex align-items-center gap-2" style="font-weight:600;font-size:var(--text-sm);color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    Transaction History (<%= txItems.length %>)
+  </h6>
+
+  <% if (txItems.length === 0) { %>
+    <div class="empty-state" style="padding:var(--space-8) 0;">
+      <p class="empty-state-text">No transactions recorded yet. Buy or sell shares to see history here.</p>
+    </div>
+  <% } else { %>
+    <div class="d-md-none">
+      <% txItems.forEach(function(t) { %>
+        <%
+          const isBuy = t.type === 'buy';
+          const txColor = isBuy ? 'var(--green)' : 'var(--red)';
+          const txBg = isBuy ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
+          const txDate = new Date(t.date);
+          const dateStr = txDate.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+        %>
+        <div style="background:var(--bg-hover);border-radius:var(--border-radius);padding:var(--space-3) var(--space-4);margin-bottom:var(--space-2);border:1px solid var(--border-default);">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge" style="background:<%= txBg %>;color:<%= txColor %>;font-size:10px;padding:3px 8px;border-radius:var(--border-radius-full);text-transform:uppercase;font-weight:700;">
+                <%= t.type %>
+              </span>
+              <span class="fw-700" style="font-size:var(--text-sm);color:var(--text-primary);"><%= t.symbol %></span>
+            </div>
+            <span class="text-muted" style="font-size:10px;"><%= dateStr %></span>
+          </div>
+          <div class="d-flex justify-content-between" style="font-size:var(--text-xs);">
+            <span class="text-secondary"><%= t.shares.toLocaleString('en-TZ') %> shares @ TZS <%= t.price.toLocaleString('en-TZ') %></span>
+            <span class="fw-600 tabular-nums" style="color:var(--text-primary);">TZS <%= (t.shares * t.price).toLocaleString('en-TZ', { maximumFractionDigits: 0 }) %></span>
+          </div>
+          <% if (t.notes) { %>
+            <p class="text-muted mb-0 mt-1" style="font-size:10px;"><%= t.notes %></p>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+
+    <div class="d-none d-md-block table-container">
+      <table class="table" style="background:transparent;--bs-table-bg:transparent;">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Stock</th>
+            <th class="text-end">Shares</th>
+            <th class="text-end">Price (TZS)</th>
+            <th class="text-end">Total (TZS)</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% txItems.forEach(function(t) { %>
+            <%
+              const isBuy = t.type === 'buy';
+              const txColor = isBuy ? 'var(--green)' : 'var(--red)';
+              const txBg = isBuy ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
+              const txDate = new Date(t.date);
+              const dateStr = txDate.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+            %>
+            <tr>
+              <td class="tabular-nums" style="font-size:var(--text-sm);white-space:nowrap;"><%= dateStr %></td>
+              <td>
+                <span class="badge" style="background:<%= txBg %>;color:<%= txColor %>;font-size:10px;padding:3px 10px;border-radius:var(--border-radius-full);text-transform:uppercase;font-weight:700;">
+                  <%= t.type %>
+                </span>
+              </td>
+              <td class="fw-700" style="font-size:var(--text-sm);"><%= t.symbol %></td>
+              <td class="text-end tabular-nums" style="font-size:var(--text-sm);"><%= t.shares.toLocaleString('en-TZ') %></td>
+              <td class="text-end tabular-nums" style="font-size:var(--text-sm);"><%= t.price.toLocaleString('en-TZ') %></td>
+              <td class="text-end tabular-nums fw-600" style="font-size:var(--text-sm);"><%= (t.shares * t.price).toLocaleString('en-TZ', { maximumFractionDigits: 0 }) %></td>
+              <td class="text-secondary" style="font-size:var(--text-xs);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= t.notes || '-' %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
