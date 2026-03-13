@@ -42,56 +42,6 @@ main {
   border-bottom: 1px solid var(--border-default) !important;
 }
 
-.navbar .navbar-brand:hover,
-.navbar .navbar-brand:focus {
-  text-decoration: none;
-  opacity: 0.9;
-}
-
-.navbar-dark .navbar-toggler {
-  border: none;
-  padding: var(--space-2);
-}
-
-.navbar-dark .navbar-toggler:focus {
-  box-shadow: none;
-}
-
-/* Bootstrap collapse on mobile — dark theme */
-@media (max-width: 991.98px) {
-  .navbar-collapse {
-    background: var(--bg-card);
-    border-radius: var(--border-radius);
-    margin-top: var(--space-3);
-    padding: var(--space-3);
-    border: 1px solid var(--border-default);
-  }
-
-  .navbar-nav .nav-link {
-    padding: var(--space-3) var(--space-4) !important;
-    border-radius: var(--border-radius-sm);
-  }
-
-  .navbar-nav .nav-link:hover,
-  .navbar-nav .nav-link.active {
-    background: var(--bg-hover);
-  }
-
-  .dropdown-menu {
-    background: var(--bg-elevated) !important;
-    border: none !important;
-    box-shadow: none !important;
-    margin: 0 !important;
-  }
-}
-
-/* Dropdown hover fix */
-.dropdown-item:hover,
-.dropdown-item:focus {
-  background: var(--bg-hover) !important;
-  color: var(--text-primary) !important;
-}
-
 /* --------------------------------------------------------------------------
    Chart Container
    -------------------------------------------------------------------------- */
