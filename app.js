@@ -83,7 +83,7 @@ app.set('layout', 'layout');
 
 // Routes
 app.use('/', indexRoutes);
-app.use('/auth', authLimiter, authRoutes);
+app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/stocks', stockRoutes);
 app.use('/portfolio', portfolioRoutes);
