@@ -94,8 +94,8 @@ app.use('/api', apiRoutes);
 // 404
 app.use((req, res) => {
   res.status(404).render('pages/error', {
-    title: 'Ukurasa Haupatikani',
-    message: 'Ukurasa unaoutafuta haupatikani.',
+    title: 'Page Not Found',
+    message: 'The page you are looking for does not exist.',
     code: 404,
   });
 });
@@ -104,8 +104,8 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).render('pages/error', {
-    title: 'Hitilafu ya Seva',
-    message: 'Kuna tatizo la kiufundi. Tafadhali jaribu tena baadaye.',
+    title: 'Server Error',
+    message: 'Something went wrong. Please try again later.',
     code: 500,
   });
 });

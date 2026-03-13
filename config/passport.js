@@ -33,6 +33,7 @@ const configurePassport = () => {
 
           done(null, user);
         } catch (err) {
+          console.error('Google OAuth strategy error:', err);
           done(err, null);
         }
       }

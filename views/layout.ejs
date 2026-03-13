@@ -68,7 +68,7 @@
     </nav>
   <% } %>
 
-  <% if (typeof currentPath === 'undefined' || currentPath === '/' || (typeof isAuthenticated !== 'undefined' && !isAuthenticated)) { %>
+  <% if (typeof currentPath === 'undefined' || currentPath === '/' || currentPath === '/privacy' || currentPath === '/terms' || (typeof isAuthenticated !== 'undefined' && !isAuthenticated)) { %>
     <%- include('partials/footer') %>
   <% } %>
 
