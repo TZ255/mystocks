@@ -27,6 +27,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust proxy (needed for secure cookies behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Helmet CSP
 app.use(
   helmet({
@@ -65,6 +68,19 @@ app.use(sessionConfig());
 
 // Flash messages
 app.use(flash());
+
+// Passport 0.7 + Express 5 compatibility
+// Passport 0.7 calls req.session.regenerate() and req.session.save() which
+// may not be available or may behave unexpectedly in some configurations.
+app.use((req, res, next) => {
+  if (req.session && !req.session.regenerate) {
+    req.session.regenerate = (cb) => cb();
+  }
+  if (req.session && !req.session.save) {
+    req.session.save = (cb) => cb();
+  }
+  next();
+});
 
 // Passport
 configurePassport();
