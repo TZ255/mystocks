@@ -178,6 +178,66 @@ export const fetchAndStoreHistory = async () => {
   }
 };
 
+/**
+ * Fetch historical prices for a specific date and store in StockHistory.
+ * Used by the backfill job to populate past data one day at a time.
+ */
+export const fetchHistoryForDate = async (dateStr) => {
+  try {
+    const { data: response } = await axios.get(
+      DSE_ENDPOINTS.historicalPrices(dateStr),
+      { timeout: 20000 }
+    );
+
+    const items = extractArray(response);
+    if (!items || items.length === 0) {
+      console.log(`No historical data for ${dateStr}`);
+      return 0;
+    }
+
+    const historyOps = [];
+
+    for (const item of items) {
+      const symbol = (item.company || item.security_code || item.symbol || '').toUpperCase().trim();
+      const dateValue = item.trade_date || item.date;
+      if (!symbol || !dateValue) continue;
+
+      const date = new Date(dateValue);
+      date.setHours(0, 0, 0, 0);
+
+      historyOps.push({
+        updateOne: {
+          filter: { symbol, date },
+          update: {
+            $set: {
+              symbol,
+              date,
+              open: parseFloat(item.opening_price || item.open || 0),
+              high: parseFloat(item.high || 0),
+              low: parseFloat(item.low || 0),
+              close: parseFloat(item.closing_price || item.close || item.price || 0),
+              volume: parseInt(item.volume || item.total_volume || 0),
+              turnover: parseFloat(item.turnover || item.total_turnover || 0),
+              deals: parseInt(item.deals || 0),
+            },
+          },
+          upsert: true,
+        },
+      });
+    }
+
+    if (historyOps.length > 0) {
+      await StockHistory.bulkWrite(historyOps);
+      console.log(`[Backfill] Stored ${historyOps.length} records for ${dateStr}`);
+    }
+
+    return historyOps.length;
+  } catch (err) {
+    console.error(`[Backfill] Error fetching history for ${dateStr}:`, err.message);
+    return 0;
+  }
+};
+
 export const fetchMarketOverview = async () => {
   try {
     const today = formatDate(new Date());

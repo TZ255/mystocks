@@ -1,17 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description"
-    content="HisaZangu — Track your Dar es Salaam Stock Exchange (DSE) investments. Portfolio, Watchlist, and Price Alerts — all in one place.">
+    content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'HisaZangu - track your Dar es Salaam Stock Exchange (DSE) investments with portfolio tools, watchlist, and price alerts.' %>">
   <meta name="keywords"
-    content="DSE, Dar es Salaam Stock Exchange, Tanzania, stock market, portfolio tracker, HisaZangu">
+    content="<%= typeof metaKeywords !== 'undefined' ? metaKeywords : 'DSE, Dar es Salaam Stock Exchange, Tanzania, stock market, portfolio tracker, HisaZangu' %>">
   <meta name="author" content="HisaZangu">
   <meta name="theme-color" content="#0B0F1A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HisaZangu">
+  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'HisaZangu - Track Your DSE Investments' %>">
+  <meta property="og:description"
+    content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'HisaZangu - track your Dar es Salaam Stock Exchange (DSE) investments with portfolio tools, watchlist, and price alerts.' %>">
+  <% if (typeof canonicalUrl !== 'undefined') { %>
+  <meta property="og:url" content="<%= canonicalUrl %>">
+  <link rel="canonical" href="<%= canonicalUrl %>">
+  <% } %>
 
   <title><%= typeof title !== 'undefined' ? title : 'HisaZangu - Track Your DSE Investments' %></title>
 

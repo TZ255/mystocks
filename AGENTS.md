@@ -262,6 +262,30 @@ Touched files:
 - `views/partials/nav.ejs`
 - `views/partials/footer.ejs`
 
+### 2026-03-14 - Landing page SEO copy refresh
+- What changed:
+  - Rewrote homepage title and SEO metadata for stronger coverage of DSE, Dar es Salaam Stock Exchange, Tanzania stocks, portfolio tracker, watchlist, and price alerts.
+  - Refined landing page content into bilingual Swahili/English copy, keeping core financial terms in English where clarity matters.
+  - Added richer explanatory content and a FAQ section to improve keyword depth and long-tail search relevance.
+  - Updated footer and empty stock-table copy to align with the new homepage messaging.
+- Why:
+  - The landing page had functional UI but relatively thin SEO-focused copy and generic metadata.
+  - The requested bilingual positioning needed clearer language for Tanzanian investors while preserving precise financial terminology.
+- Validation:
+  - `node --check routes/index.js`
+  - Manual review of updated `.ejs` content and metadata wiring.
+  - Manual inspection that homepage sections still use existing CSS classes and layout structure.
+- Open issues:
+  - Browser QA is still recommended to review final line wrapping and content density on small screens.
+  - Open Graph image/Twitter card metadata is still not defined if social preview optimization is needed later.
+
+Touched files:
+- `routes/index.js`
+- `views/layout.ejs`
+- `views/pages/landing.ejs`
+- `views/fragments/stock-table.ejs`
+- `views/partials/footer.ejs`
+
 ---
 
 ## Update Template (Use After Every Change)

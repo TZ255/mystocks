@@ -13,7 +13,12 @@ router.get('/', ensureGuest, async (req, res) => {
     ]);
 
     res.render('pages/landing', {
-      title: 'HisaZangu - Track Your DSE Investments',
+      title: 'HisaZangu | DSE Portfolio Tracker Tanzania | Fuatilia Hisa za Dar es Salaam Stock Exchange',
+      metaDescription:
+        'HisaZangu ni DSE portfolio tracker ya Tanzania inayokusaidia kufuatilia Dar es Salaam Stock Exchange stocks, watchlist, market data, na price alerts kwa urahisi.',
+      metaKeywords:
+        'DSE, Dar es Salaam Stock Exchange, Tanzania stocks, DSE portfolio tracker, HisaZangu, price alerts, watchlist, stock market Tanzania, hisa za Tanzania, portfolio management',
+      canonicalUrl: 'https://hisazangu.com/',
       totalStocks,
       totalVolume: totalVolumeAgg[0]?.total || 0,
       layout: 'layout',
@@ -21,7 +26,12 @@ router.get('/', ensureGuest, async (req, res) => {
   } catch (err) {
     console.error('Landing page error:', err);
     res.render('pages/landing', {
-      title: 'HisaZangu - Track Your DSE Investments',
+      title: 'HisaZangu | DSE Portfolio Tracker Tanzania | Fuatilia Hisa za Dar es Salaam Stock Exchange',
+      metaDescription:
+        'HisaZangu ni DSE portfolio tracker ya Tanzania inayokusaidia kufuatilia Dar es Salaam Stock Exchange stocks, watchlist, market data, na price alerts kwa urahisi.',
+      metaKeywords:
+        'DSE, Dar es Salaam Stock Exchange, Tanzania stocks, DSE portfolio tracker, HisaZangu, price alerts, watchlist, stock market Tanzania, hisa za Tanzania, portfolio management',
+      canonicalUrl: 'https://hisazangu.com/',
       totalStocks: 0,
       totalVolume: 0,
       layout: 'layout',

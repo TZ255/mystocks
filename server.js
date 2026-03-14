@@ -13,7 +13,9 @@ const start = async () => {
   });
 
   // Start cron job for DSE data
-  startStockFetcher();
+  if (process.env?.NODE_ENV === "production") {
+    startStockFetcher();
+  }
 };
 
 start();
