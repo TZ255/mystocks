@@ -286,6 +286,45 @@ Touched files:
 - `views/fragments/stock-table.ejs`
 - `views/partials/footer.ejs`
 
+### 2026-03-14 - Footer product attribution
+- What changed:
+  - Added `A TanzaByte Digital Product.` attribution line to the site footer.
+- Why:
+  - To clearly indicate that HisaZangu was created by TanzaByte Digital.
+- Validation:
+  - Manual review of footer markup in the shared footer partial.
+- Open issues:
+  - Browser QA is still recommended to confirm spacing and readability in the footer on small screens.
+
+Touched files:
+- `views/partials/footer.ejs`
+
+### 2026-03-14 - Footer attribution brand styling
+- What changed:
+  - Styled the `TanzaByte` footer attribution using the same primary text and gold accent treatment used in the brand wordmark.
+- Why:
+  - To visually connect the creator attribution with the site branding instead of leaving it as flat muted text.
+- Validation:
+  - Manual review of updated footer markup and inline brand color usage.
+- Open issues:
+  - Browser QA is still recommended to confirm contrast and spacing in the footer across devices.
+
+Touched files:
+- `views/partials/footer.ejs`
+
+### 2026-03-14 - Footer attribution copy refinement
+- What changed:
+  - Rewrote the footer attribution to a more branded line: `Crafted in Tanzania by TanzaByte Digital.` while keeping the brand color treatment.
+- Why:
+  - To make the creator attribution feel more intentional and distinctive instead of sounding generic.
+- Validation:
+  - Manual review of footer copy and markup.
+- Open issues:
+  - Browser QA is still recommended to confirm the final tone and spacing in context.
+
+Touched files:
+- `views/partials/footer.ejs`
+
 ---
 
 ## Update Template (Use After Every Change)
