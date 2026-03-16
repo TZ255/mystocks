@@ -87,6 +87,21 @@ configurePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Prevent empty sessions from being persisted to the database.
+// Passport and other middleware may create empty objects (e.g. passport: {})
+// on the session, which marks it as modified and triggers a save.
+app.use((req, res, next) => {
+  if (req.session && !req.isAuthenticated()) {
+    if (req.session.passport && Object.keys(req.session.passport).length === 0) {
+      delete req.session.passport;
+    }
+    if (req.session.flash && Object.keys(req.session.flash).length === 0) {
+      delete req.session.flash;
+    }
+  }
+  next();
+});
+
 // Custom middleware
 app.use(flashMiddleware);
 app.use(setLocals);
