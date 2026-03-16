@@ -76,7 +76,7 @@ export const startStockFetcher = () => {
   });
 
   // Daily historical data sync at 16:00 EAT (after market close)
-  cron.schedule('0 16,20 * * 1-5', async () => {
+  cron.schedule('0 16,17,20 * * 1-5', async () => {
     console.log(`[${new Date().toISOString()}] Cron: syncing historical data...`);
     await fetchAndStoreHistory();
   }, {
