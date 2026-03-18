@@ -34,6 +34,7 @@
   let currentSymbol = null;
   let activePeriod = '30';
   let allocationChart = null;
+  let chartResizeFrame = null;
 
   // ---------------------------------------------------------------------------
   // Stock Price Chart
@@ -41,6 +42,76 @@
 
   function getChartContainer() {
     return document.getElementById('stock-chart') || document.querySelector('[data-chart]');
+  }
+
+  function isMobileViewport() {
+    return window.matchMedia('(max-width: 575.98px)').matches;
+  }
+
+  function parsePeriod(period) {
+    const parsed = Number.parseInt(period, 10);
+    return Number.isFinite(parsed) ? parsed : 30;
+  }
+
+  function parseChartDate(label) {
+    if (!label) return null;
+    const date = new Date(label);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function formatChartDateLabel(label, period) {
+    const date = parseChartDate(label);
+    if (!date) return label;
+
+    if (period >= 365) {
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      return `${month}/${date.getFullYear()}`;
+    }
+
+    const options = { day: 'numeric', month: 'short' };
+    return new Intl.DateTimeFormat('en-TZ', options).format(date);
+  }
+
+  function getChartTickConfig(period) {
+    const mobile = isMobileViewport();
+    const denseRange = period >= 30;
+    const maxTicksLimit = mobile
+      ? (period >= 365 ? 6 : period >= 90 ? 4 : period >= 30 ? 5 : 4)
+      : (period >= 365 ? 8 : 6);
+
+    return {
+      color: 'rgba(255, 255, 255, 0.5)',
+      autoSkip: true,
+      autoSkipPadding: mobile ? 12 : 16,
+      maxRotation: mobile && denseRange ? 45 : 0,
+      minRotation: mobile && denseRange ? 45 : 0,
+      maxTicksLimit,
+      font: { size: mobile ? 10 : 11 },
+      callback: function (value) {
+        const label = typeof this.getLabelForValue === 'function'
+          ? this.getLabelForValue(value)
+          : value;
+
+        return formatChartDateLabel(label, period);
+      },
+    };
+  }
+
+  function applyResponsiveChartOptions(period) {
+    if (!chartInstance) return;
+
+    const tickConfig = getChartTickConfig(period);
+    const mobile = isMobileViewport();
+
+    chartInstance.options.layout = {
+      padding: {
+        bottom: mobile && period >= 30 ? 8 : 0,
+      },
+    };
+    chartInstance.options.scales.x.ticks = {
+      ...chartInstance.options.scales.x.ticks,
+      ...tickConfig,
+    };
   }
 
   function initChart() {
@@ -81,7 +152,7 @@
       }
 
       const data = await response.json();
-      renderChart(container, data, symbol);
+      renderChart(container, data, symbol, period);
     } catch (err) {
       console.error('[HisaZangu] Chart fetch failed:', err);
 
@@ -93,7 +164,7 @@
     }
   }
 
-  function renderChart(container, data, symbol) {
+  function renderChart(container, data, symbol, period) {
     if (typeof Chart === 'undefined') return;
 
     let canvas = container.querySelector('canvas');
@@ -116,6 +187,9 @@
       chartInstance.destroy();
       chartInstance = null;
     }
+
+    const periodDays = parsePeriod(period);
+    const tickConfig = getChartTickConfig(periodDays);
 
     chartInstance = new Chart(ctx, {
       type: 'line',
@@ -140,6 +214,11 @@
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
+        layout: {
+          padding: {
+            bottom: isMobileViewport() && periodDays >= 30 ? 8 : 0,
+          },
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -163,12 +242,7 @@
         scales: {
           x: {
             grid: { color: COLORS.gridLine, drawBorder: false },
-            ticks: {
-              color: 'rgba(255, 255, 255, 0.5)',
-              maxRotation: 0,
-              maxTicksLimit: 6,
-              font: { size: 11 },
-            },
+            ticks: tickConfig,
           },
           y: {
             grid: { color: COLORS.gridLine, drawBorder: false },
@@ -291,6 +365,20 @@
     initAllocationChart();
   }
 
+  function handleChartResize() {
+    if (!chartInstance) return;
+
+    if (chartResizeFrame) {
+      window.cancelAnimationFrame(chartResizeFrame);
+    }
+
+    chartResizeFrame = window.requestAnimationFrame(() => {
+      applyResponsiveChartOptions(parsePeriod(activePeriod));
+      chartInstance.update('none');
+      chartResizeFrame = null;
+    });
+  }
+
   document.addEventListener('htmx:afterSwap', (event) => {
     const target = event.detail.target;
     if (!target) return;
@@ -304,6 +392,8 @@
       initPeriodButtons();
     }
   });
+
+  window.addEventListener('resize', handleChartResize);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

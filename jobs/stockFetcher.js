@@ -10,10 +10,10 @@ const formatDate = (date) => date.toISOString().split('T')[0];
  * Set BACKFILL_DAYS env var to control range (default 7).
  */
 const startBackfill = () => {
-  const days = parseInt(process.env.BACKFILL_DAYS || '90');
+  const days = parseInt(process.env.BACKFILL_DAYS || '366');
   const dates = [];
 
-  for (let i = days; i >= 1; i--) {
+  for (let i = days; i >= 66; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     // Skip weekends (Sat=6, Sun=0)

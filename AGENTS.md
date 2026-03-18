@@ -325,6 +325,37 @@ Touched files:
 Touched files:
 - `views/partials/footer.ejs`
 
+### 2026-03-18 - Mobile stock chart tick readability
+- What changed:
+  - Updated the stock detail Chart.js x-axis logic to shorten date labels on smaller screens, rotate dense date ticks for 30D/90D/1Y views, and re-apply responsive tick settings on viewport resize.
+  - Kept 1Y mobile labels short but still year-aware to avoid ambiguous month-only ticks.
+- Why:
+  - Mobile chart date labels were overcrowded on longer time ranges, making the stock detail chart difficult to read on phones.
+- Validation:
+  - `node --check public/js/dashboard.js`
+  - Manual code review of responsive tick formatting and resize update flow.
+- Open issues:
+  - Browser/device QA is still recommended to confirm final readability and spacing on actual mobile screens.
+
+Touched files:
+- `public/js/dashboard.js`
+- `AGENTS.md`
+
+### 2026-03-18 - 1Y chart date format clarification
+- What changed:
+  - Updated the 1Y stock chart x-axis formatter to render dates as `MM/YYYY` instead of abbreviated month text.
+- Why:
+  - Numeric month/year labels reduce ambiguity on the 1Y view and make the longer-range timeline easier to scan.
+- Validation:
+  - `node --check public/js/dashboard.js`
+  - Manual code review of the 1Y label formatting branch.
+- Open issues:
+  - Browser/device QA is still recommended to confirm the final label density and readability on small screens.
+
+Touched files:
+- `public/js/dashboard.js`
+- `AGENTS.md`
+
 ---
 
 ## Update Template (Use After Every Change)
