@@ -39,15 +39,19 @@
             </span>
           </div>
           <div class="row g-2" style="font-size:var(--text-xs);">
-            <div class="col-4">
+            <div class="col-3">
               <span class="text-muted d-block">Shares</span>
               <span class="fw-600 tabular-nums"><%= h.shares.toLocaleString('en-TZ') %></span>
             </div>
-            <div class="col-4">
+            <div class="col-3">
+              <span class="text-muted d-block">Avg Cost</span>
+              <span class="fw-600 tabular-nums text-secondary"><%= h.avgBuyPrice ? h.avgBuyPrice.toLocaleString('en-TZ', {maximumFractionDigits:0}) : '0' %></span>
+            </div>
+            <div class="col-3">
               <span class="text-muted d-block">Price</span>
               <span class="fw-600 tabular-nums"><%= h.currentPrice ? h.currentPrice.toLocaleString('en-TZ') : '0' %></span>
             </div>
-            <div class="col-4 text-end">
+            <div class="col-3 text-end">
               <span class="text-muted d-block">Value</span>
               <span class="fw-600 tabular-nums"><%= h.currentValue ? h.currentValue.toLocaleString('en-TZ', {maximumFractionDigits:0}) : '0' %></span>
             </div>
@@ -108,7 +112,7 @@
                 </a>
               </td>
               <td class="text-end tabular-nums" style="font-size:var(--text-sm);"><%= h.shares.toLocaleString('en-TZ') %></td>
-              <td class="text-end tabular-nums text-secondary" style="font-size:var(--text-sm);"><%= h.avgBuyPrice ? h.avgBuyPrice.toLocaleString('en-TZ') : '0' %></td>
+              <td class="text-end tabular-nums text-secondary" style="font-size:var(--text-sm);"><%= h.avgBuyPrice ? h.avgBuyPrice.toLocaleString('en-TZ', {maximumFractionDigits:0}) : '0' %></td>
               <td class="text-end tabular-nums" style="font-size:var(--text-sm);"><%= h.currentPrice ? h.currentPrice.toLocaleString('en-TZ') : '0' %></td>
               <td class="text-end tabular-nums fw-600" style="font-size:var(--text-sm);"><%= h.currentValue ? h.currentValue.toLocaleString('en-TZ', {maximumFractionDigits:0}) : '0' %></td>
               <td class="text-end">

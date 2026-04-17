@@ -356,6 +356,58 @@ Touched files:
 - `public/js/dashboard.js`
 - `AGENTS.md`
 
+### 2026-04-17 - Portfolio summary fee visibility + mobile avg cost
+- What changed:
+  - Added `totalInvestedWithFees` to portfolio summary output in `calculatePortfolioSummary`.
+  - Updated the portfolio summary partial to show two additional rows: `Fees Paid` and `Invested + Fees`.
+  - Updated mobile holdings cards to show `Avg Cost` on small screens alongside shares, current price, and value.
+- Why:
+  - To surface fee-aware portfolio totals directly in the summary view and make average costing visible on mobile holdings as requested.
+- Validation:
+  - `node --check services/portfolioService.js`
+  - Manual review of updated `.ejs` rendering logic for summary and mobile holdings cards.
+- Open issues:
+  - Browser QA is still recommended on small screens to confirm density/readability after adding the extra mobile metric column.
+
+Touched files:
+- `services/portfolioService.js`
+- `views/partials/portfolio-summary.ejs`
+- `views/fragments/portfolio-holdings.ejs`
+- `AGENTS.md`
+
+### 2026-04-17 - Portfolio summary row simplification
+- What changed:
+  - Removed the extra summary row from the portfolio summary card.
+  - Removed the `Invested + Fees` metric from the UI and moved `Fees Paid` into the main metrics row directly after `Invested`.
+  - Removed the no-longer-used `totalInvestedWithFees` field from `calculatePortfolioSummary`.
+- Why:
+  - To match the requested layout: no secondary fee row and `Fees Paid` positioned next to `Invested`.
+- Validation:
+  - `node --check services/portfolioService.js`
+  - Manual review of `views/partials/portfolio-summary.ejs` rendering order and row structure.
+- Open issues:
+  - Browser QA is still recommended to confirm spacing with five summary metrics across breakpoints.
+
+Touched files:
+- `views/partials/portfolio-summary.ejs`
+- `services/portfolioService.js`
+- `AGENTS.md`
+
+### 2026-04-17 - Avg cost formatting + muted mobile style
+- What changed:
+  - Updated average cost rendering in portfolio holdings (mobile cards and desktop table) to hide decimal points by using whole-number formatting.
+  - Updated mobile avg-cost value style to use muted text, matching desktop avg-cost presentation.
+- Why:
+  - To keep average-cost values visually consistent and cleaner, and to align small-screen avg-cost styling with large-screen behavior.
+- Validation:
+  - Manual review of `views/fragments/portfolio-holdings.ejs` output formatting and classes for avg-cost fields.
+- Open issues:
+  - Browser QA is still recommended to confirm readability and spacing on small screens after styling alignment.
+
+Touched files:
+- `views/fragments/portfolio-holdings.ejs`
+- `AGENTS.md`
+
 ---
 
 ## Update Template (Use After Every Change)

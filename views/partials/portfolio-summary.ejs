@@ -2,6 +2,7 @@
   const ps = typeof portfolioSummary !== 'undefined' ? portfolioSummary : {};
   const totalValue = ps.totalCurrentValue || 0;
   const totalInvested = ps.totalInvested || 0;
+  const totalFees = ps.totalFees || 0;
   const totalGain = ps.totalGain || 0;
   const totalGainPct = ps.totalGainPercent || 0;
   const isGain = totalGain >= 0;
@@ -11,7 +12,7 @@
 <div class="portfolio-summary glass-strong" style="border-radius:var(--border-radius-lg);padding:var(--space-6);border:1px solid var(--border-default);">
   <div class="row g-3">
     <!-- Total Value -->
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md">
       <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Current Value</p>
       <span class="tabular-nums fw-700" style="font-size:var(--text-xl);color:var(--text-primary);">
         <%= totalValue.toLocaleString('en-TZ', {maximumFractionDigits:0}) %>
@@ -20,7 +21,7 @@
     </div>
 
     <!-- Total Invested -->
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md">
       <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Invested</p>
       <span class="tabular-nums fw-600" style="font-size:var(--text-lg);color:var(--text-primary);">
         <%= totalInvested.toLocaleString('en-TZ', {maximumFractionDigits:0}) %>
@@ -28,8 +29,17 @@
       <span class="text-muted" style="font-size:10px;"> TZS</span>
     </div>
 
+    <!-- Fees Paid -->
+    <div class="col-6 col-md">
+      <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Fees Paid</p>
+      <span class="tabular-nums fw-600" style="font-size:var(--text-lg);color:var(--text-primary);">
+        <%= totalFees.toLocaleString('en-TZ', {maximumFractionDigits:0}) %>
+      </span>
+      <span class="text-muted" style="font-size:10px;"> TZS</span>
+    </div>
+
     <!-- Gain / Loss -->
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md">
       <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Profit / Loss</p>
       <span class="tabular-nums fw-700" style="font-size:var(--text-lg);color:<%= gainColor %>;">
         <%= isGain ? '+' : '' %><%= totalGain.toLocaleString('en-TZ', {maximumFractionDigits:0}) %>
@@ -38,7 +48,7 @@
     </div>
 
     <!-- Gain % -->
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md">
       <p class="text-secondary mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">Return</p>
       <span class="d-inline-block tabular-nums fw-700" style="font-size:var(--text-base);padding:4px 12px;border-radius:var(--border-radius-full);background:<%= gainBg %>;color:<%= gainColor %>;">
         <%= isGain ? '+' : '' %><%= totalGainPct.toFixed(2) %>%
